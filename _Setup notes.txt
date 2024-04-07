@@ -1,0 +1,6 @@
+1. Install python 2.7 (installer)
+2. Install wxPython 2.8 (installer)
+3. Install pySerial (C:\Python27\python.exe -m pip install pyserial)
+5. Install Python extension version 2021.9.1246542782 (installer)
+    (https://stackoverflow.com/questions/72214043/how-to-debug-python-2-7-code-with-vs-code)
+6. Disable Pylance and Python Debugger
