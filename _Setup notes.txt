@@ -4,3 +4,8 @@
 5. Install Python extension version 2021.9.1246542782 (installer)
     (https://stackoverflow.com/questions/72214043/how-to-debug-python-2-7-code-with-vs-code)
 6. Disable Pylance and Python Debugger
+
+Flask tutorials
+https://www.techwithtim.net/tutorials/flask/flask-adding-bootstrap
+https://youtu.be/F7AK-WzpYdY?si=2lk1p6bYDhUyfqKd
+
