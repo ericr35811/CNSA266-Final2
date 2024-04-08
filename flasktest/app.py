@@ -1,6 +1,7 @@
 from flask import Flask, render_template
 from flask import redirect, url_for, request, session
 from datetime import datetime
+import psutil
 
 app = Flask(__name__)
 
@@ -62,7 +63,8 @@ def sessionview():
 @app.route('/time', methods=['POST', 'GET'])
 def timePostBack():
     if request.method == 'POST':
-        return render_template("time.jinja", time=datetime.now())
+        #return render_template("time.jinja", time=datetime.now())
+        return str(psutil.cpu_percent())
     else:
         return render_template("time.jinja")
 
