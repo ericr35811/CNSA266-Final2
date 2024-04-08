@@ -9,3 +9,12 @@ Flask tutorials
 https://www.techwithtim.net/tutorials/flask/flask-adding-bootstrap
 https://youtu.be/F7AK-WzpYdY?si=2lk1p6bYDhUyfqKd
 
+PI STEPS
+1. Install Miniforge (https://github.com/conda-forge/miniforge?tab=readme-ov-file)
+    a. Say yes to letting it hook your shell
+2. conda create -n py2test python=2
+3. conda activate py2test
+4. conda install flask pyserial psutil
+5. run python2 (or python) like normal
+6. with old python extension in vscode, Select Interpreter and be used to select the python2 environment
+ 
