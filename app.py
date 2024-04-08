@@ -6,10 +6,10 @@ app = Flask(__name__)
 
 app.secret_key='supersecret'
 
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/cpu', methods=['GET', 'POST'])
 def index():
 	if request.method == 'POST':
-		elapsed = (datetime.now() - session['t0']).strftime('%H:%M:%S:%f')[:-4]
+		elapsed = str((datetime.now() - session['t0']))[2:-4]
 		percent = str(round(cpu_percent(), 1))
 		print(percent)
 		return elapsed + '|' + percent
@@ -18,4 +18,5 @@ def index():
 		return render_template('main.html')
 
 if __name__ == '__main__':
-	app.run(debug=True)
+	#app.run(debug=True)
+	app.run(host="172.16.0.176")
