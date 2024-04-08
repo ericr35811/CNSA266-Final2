@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+
+<head>
+    <title>time</title>
+</head>
+
+<body>
+    
+    <form id="frmTime" method="post"></form>
+
+    <p>Today is {{time}}</p>
+
+    <script>
+        var frmTime = document.getElementById("frmTime");
+
+        function timePostBack() {
+            frmTime.submit();
+        }
+
+        setInterval(timePostBack, 1000);
+    </script>
+</body>

@@ -1,5 +1,6 @@
 from flask import Flask, render_template
 from flask import redirect, url_for, request, session
+from datetime import datetime
 
 app = Flask(__name__)
 
@@ -57,6 +58,14 @@ def sessionwrite():
 def sessionview():
     return "<h1>Your name is " + session['nm'] + "</h1>"
 
+
+@app.route('/time', methods=['POST', 'GET'])
+def timePostBack():
+    if request.method == 'POST':
+        return render_template("time.jinja", time=datetime.now())
+    else:
+        return render_template("time.jinja")
+
 if __name__ == '__main__':
     # run app
     # FLASK_APP=app.py
@@ -66,4 +75,5 @@ if __name__ == '__main__':
 
     # debug - reloads changes automatically
     # FLASK_DEBUG=1
-    app.run(debug=True)\
+    # app.run(debug=True, host="172.16.0.104")
+    app.run(debug=True)
