@@ -24,7 +24,6 @@ def index():
 
 if __name__ == '__main__':
 	#app.run(debug=True)
-	# get ipv4 address of tailscale
 
 	if gethostname() == 'raspberrypi':
 		ip = '100.103.188.37'
