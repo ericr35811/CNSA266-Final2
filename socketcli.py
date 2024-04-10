@@ -1,28 +1,30 @@
 import socket
 
-HOST = '127.0.0.1'
-PORT = 9002
 
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+if __name__ == "__main__":
 
-s.connect((HOST, PORT))
+    HOST = '127.0.0.1'
+    PORT = 9002
 
-#    d = str(raw_input('> '))
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-s.send(bytes("asdf"))
+    s.connect((HOST, PORT))
 
-data = s.recv(1024)
-if data:
-    print(data)
-else:
-    print('C: no data')
 
-while True:
-    pass
-#
-# s.send()
-# data = s.recv(1024)
-# if data:
-#     print(data)
-# else:
-#     print('C: no data')
+    s.send(bytes(test))
+
+    data = s.recv(1000)
+    if data:
+        print(data)
+    else:
+        print('C: no data')
+
+    while True:
+        pass
+    #
+    # s.send()
+    # data = s.recv(1024)
+    # if data:
+    #     print(data)
+    # else:
+    #     print('C: no data')

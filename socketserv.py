@@ -1,5 +1,6 @@
 import socket
-
+from time import sleep
+from socketcli import Test
 
 class ServerSocket:
     def __init__(self, portbase):
@@ -22,13 +23,17 @@ conn, addr = s.accept()
 print 'Connected by', addr
 
 while True:
-    data = conn.recv(1024)
+    data = conn.recv(1000)
 
     if data:
-        print str.upper(data)
-        conn.send(str.upper(data))
+        print data
+        conn.send(data)
+
+        assert isinstance(data, Test)
+        print data.a, data.b
     else:
         print "no data"
+        break
         # conn.send("S: no data")
 
 
