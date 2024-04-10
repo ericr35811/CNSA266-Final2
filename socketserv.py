@@ -29,7 +29,7 @@ while True:
         conn.send(str.upper(data))
     else:
         print "no data"
-        conn.send("S: no data")
+        # conn.send("S: no data")
 
 
 

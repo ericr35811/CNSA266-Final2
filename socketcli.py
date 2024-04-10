@@ -9,7 +9,8 @@ s.connect((HOST, PORT))
 
 #    d = str(raw_input('> '))
 
-s.send("asdf")
+s.send(bytes("asdf"))
+
 data = s.recv(1024)
 if data:
     print(data)
