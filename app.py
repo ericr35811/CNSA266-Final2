@@ -25,7 +25,8 @@ def index():
 @app.route('/js/<filename>')
 def js(filename):
 	with open('js/' + filename) as f:
-		return f.read();
+		return f.read()
+
 
 if __name__ == '__main__':
 	#app.run(debug=True)
