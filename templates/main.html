@@ -32,7 +32,9 @@
 			options: {
 				scales: {
 					y: {
-						beginAtZero: true
+						beginAtZero: true,
+						min: 0,
+						max: 100
 					}
 				}
 			}
@@ -51,20 +53,39 @@
             }
         }
 
+		const maxPoints = 40;
+		// fill chart with blank data
+		lineChart.data.labels = Array.from(Array(maxPoints), () => "")
+		lineChart.data.datasets[0].data = Array.from(Array(maxPoints), () => 0);
+
         function updateCpu() {
             //frmTime.submit();
 
             $.post(
-                // send POST request to localhost/time with no data
+                // send POST request to localhost/cpu with no data
                 window.location.href,
                 // callback function. "data" is returned by the server
                 function (data, status) {
+					// parse data
 					var d = data.split('|');
 					var t = d[0];
 					var y = Number.parseFloat(d[1]);
 
-					lineChart.data.labels.push(t);
-                    lineChart.data.datasets[0].data.push(y);
+					// get  linechart axes
+					var xAxis = lineChart.data.labels;
+					var yAxis = lineChart.data.datasets[0].data;
+
+					// add new data to chart
+					xAxis.push(t);
+					yAxis.push(y);
+
+					// limit chart to 20 data points?
+					if (xAxis.length >= maxPoints)
+						lineChart.data.labels = xAxis.slice(xAxis.length - maxPoints, xAxis.length);
+					if (xAxis.length >= maxPoints)
+						lineChart.data.datasets[0].data = yAxis.slice(yAxis.length - maxPoints, yAxis.length);
+
+					// update with no animation
 					lineChart.update('none');
                 }
             );
