@@ -21,6 +21,11 @@ def index():
 		session['t0'] = datetime.now()
 		return render_template('main.html')
 
+# STATIC ASSETS, MOVE THESE -------------------------------
+@app.route('/js/<filename>')
+def js(filename):
+	with open('js/' + filename) as f:
+		return f.read();
 
 if __name__ == '__main__':
 	#app.run(debug=True)

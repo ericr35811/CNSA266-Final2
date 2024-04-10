@@ -13,84 +13,25 @@
 	</div>
 
 	<div>
-		<input id="txtInterval" type="text" value="1000" onblur="setIntv()"/>
+		<label for="txtInterval">Interval</label>
+		<input id="txtInterval" type="text" onblur="setIntv()"/>
 	</div>
 
+	<div>
+		<label for="txtMaxPoints">Graph length</label>
+		<input id="txtMaxPoints" type="text" onblur="setMaxPoints()"/>
+	</div>
+
+	<script src="/js/main.js"></script>
+
 	<script>
-		const ctx2 = document.getElementById('cpuChart');
-		const lineChart = new Chart(ctx2, {
-			type: 'line',
-			data: {
-				//labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
-				labels: [],
-				datasets: [{
-					label: 'CPU load',
-					data: [],
-					borderWidth: 1
-				}]
-			},
-			options: {
-				scales: {
-					y: {
-						beginAtZero: true,
-						min: 0,
-						max: 100
-					}
-				}
-			}
-		});
+		// initialize values
+		document.getElementById('txtInterval').value = '250';
+		document.getElementById('txtMaxPoints').value = '50';
 
-		var intv = setInterval(updateCpu, 1000);
-
-        function setIntv() {
-            // get the value from the txtInterval control
-            var num = $("#txtInterval").val();
-            // if value is an integer:
-            num = parseInt(num)
-            if (!isNaN(num)) {
-                clearInterval(intv);
-                intv = setInterval(updateCpu, num);
-            }
-        }
-
-		const maxPoints = 40;
-		// fill chart with blank data
-		lineChart.data.labels = Array.from(Array(maxPoints), () => "")
-		lineChart.data.datasets[0].data = Array.from(Array(maxPoints), () => 0);
-
-        function updateCpu() {
-            //frmTime.submit();
-
-            $.post(
-                // send POST request to localhost/cpu with no data
-                window.location.href,
-                // callback function. "data" is returned by the server
-                function (data, status) {
-					// parse data
-					var d = data.split('|');
-					var t = d[0];
-					var y = Number.parseFloat(d[1]);
-
-					// get  linechart axes
-					var xAxis = lineChart.data.labels;
-					var yAxis = lineChart.data.datasets[0].data;
-
-					// add new data to chart
-					xAxis.push(t);
-					yAxis.push(y);
-
-					// limit chart to 20 data points?
-					if (xAxis.length >= maxPoints)
-						lineChart.data.labels = xAxis.slice(xAxis.length - maxPoints, xAxis.length);
-					if (xAxis.length >= maxPoints)
-						lineChart.data.datasets[0].data = yAxis.slice(yAxis.length - maxPoints, yAxis.length);
-
-					// update with no animation
-					lineChart.update('none');
-                }
-            );
-        }
-
+		//
+		setIntv();
+		setMaxPoints();
 	</script>
 
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
