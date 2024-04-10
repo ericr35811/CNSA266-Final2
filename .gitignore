@@ -1,2 +1,7 @@
 *.pyc
 .vscode/
+/.idea/CNSA266-Final.iml
+/.idea/misc.xml
+/.idea/modules.xml
+/.idea/inspectionProfiles/profiles_settings.xml
+/.idea/vcs.xml
