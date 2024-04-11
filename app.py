@@ -3,7 +3,8 @@ from psutil import cpu_percent
 from datetime import datetime
 from socket import gethostname
 from flask_socketio import SocketIO, emit
-from enum import Enum
+from cpuusage import CpuUsage
+
 # import obd
 
 app = Flask(__name__)
@@ -27,40 +28,14 @@ socketio = SocketIO(app)
 # 		return render_template('main.html')
 
 
-class CpuUsage:
-	def __init__(self):
-		self.log = []
-		self.running = False
-		self.t0 = datetime.now()
-		self.interval = 1
 
-	def setInterval(self, ms):
-		self.interval = ms / 1000
-
-	def addToLog(self):
-		elapsed = str((datetime.now() - self.t0))[2:-4]
-		percent = str(round(cpu_percent(), 1))
-		#self.log.append({'elapsed': elapsed, 'percent': percent})
-		socketio.emit('sendcpu', {'elapsed': elapsed, 'percent': percent})
-
-	def popFromLog(self):
-		return self.log.pop(0)
-
-	def start(self):
-		self.running = True
-		while self.running:
-			self.addToLog()
-			socketio.sleep(self.interval)
-
-	def stop(self):
-		self.running = False
 
 class AppState:
 	def __init__(self):
 		self.connected = False
 
 
-cpulog = CpuUsage()
+cpulog = CpuUsage(socketio)
 appstate = AppState()
 
 @app.route('/')

@@ -34,19 +34,17 @@
         document.getElementById('txtInterval').value = '1000';
         document.getElementById('txtMaxPoints').value = '50';
 
+
+        setMaxPoints();
+
         var socket = io();
 
-        socket.on('disconnect', () => {
+        {#socket.on('disconnect', () => {
             clearIntv()
-        })
+        })#}
 
 
-        socket.emit('startcpu', () => {
-
-            //setIntv();
-            setMaxPoints();
-
-        });
+        socket.emit('startcpu');
     </script>
 
     <script src="/js/main.js"></script>
