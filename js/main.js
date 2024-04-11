@@ -1,3 +1,4 @@
+var socket = io();
 var maxPoints = 10;
 var intv;
 
