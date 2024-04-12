@@ -48,31 +48,39 @@ def index():
 
 @socketio.on('connect')
 def onconnect():
-	print('connected')
+	if not appstate.connected:
+		print('connected')
+	else:
+		print('already connected')
 
 
 @socketio.on('disconnect')
 def ondisconnect():
-	appstate.connected = False
-	cpulog.stop()
-	print('disconnected')
+	if appstate.connected:
+		appstate.connected = False
+		cpulog.stop()
+		print('disconnected')
+	else:
+		print('already disconnected')
 
 
 @socketio.on('startcpu')
 def startcpu():
-	socketio.start_background_task(cpulog.start())
+	if appstate.connected:
+		socketio.start_background_task(cpulog.start())
 	return
 
 
-@socketio.on('getcpu')
-def getcpu():
-	data = cpulog.popFromLog()
-	emit('sendcpu', data)
+# @socketio.on('getcpu')
+# def getcpu():
+# 	data = cpulog.popFromLog()
+# 	emit('sendcpu', data)
 
 
 @socketio.on('setInterval')
 def onSetInterval(interval):
-	cpulog.setInterval(interval)
+	if appstate.connected:
+		cpulog.setInterval(interval)
 
 
 # STATIC ASSETS, MOVE THESE -------------------------------
