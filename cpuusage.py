@@ -1,7 +1,8 @@
 from datetime import datetime
 from psutil import cpu_percent
 
-class CpuUsage:
+
+class CpuUsage():
 	def __init__(self, socketio):
 		self.log = []
 		self.running = False

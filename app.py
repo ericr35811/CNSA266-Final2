@@ -10,7 +10,7 @@ from cpuusage import CpuUsage
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'RAAAH SECRET'
 
-socketio = SocketIO(app)
+socketio = SocketIO(app, logger=app.logger, engineio_logger=app.logger)
 
 
 #app.secret_key = 'supersecret'
@@ -28,8 +28,6 @@ socketio = SocketIO(app)
 # 		return render_template('main.html')
 
 
-
-
 class AppState:
 	def __init__(self):
 		self.connected = False
@@ -37,6 +35,7 @@ class AppState:
 
 cpulog = CpuUsage(socketio)
 appstate = AppState()
+
 
 @app.route('/')
 def index():
@@ -46,9 +45,11 @@ def index():
 	else:
 		return 'too many connections'
 
+
 @socketio.on('connect')
 def onconnect():
 	print('connected')
+
 
 @socketio.on('disconnect')
 def ondisconnect():
@@ -62,22 +63,23 @@ def startcpu():
 	socketio.start_background_task(cpulog.start())
 	return
 
+
 @socketio.on('getcpu')
 def getcpu():
 	data = cpulog.popFromLog()
 	emit('sendcpu', data)
 
+
 @socketio.on('setInterval')
 def onSetInterval(interval):
 	cpulog.setInterval(interval)
+
 
 # STATIC ASSETS, MOVE THESE -------------------------------
 @app.route('/js/<filename>')
 def js(filename):
 	with open('js/' + filename) as f:
 		return Response(f.read(), mimetype='text/javascript')
-
-
 
 
 if __name__ == '__main__':
@@ -89,5 +91,5 @@ if __name__ == '__main__':
 		ip = '127.0.0.1'
 
 	#app.run(host=ip)
-
+	app.logger.setLevel('DEBUG')
 	socketio.run(app, host=ip)
