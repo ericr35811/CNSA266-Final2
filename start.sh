@@ -1,11 +1,18 @@
 #!/bin/bash
 
+if [ -z "$PIDFILE" ]
+then
+	PIDFILE=gunicorn.pid
+fi
+
 if [ $1- == '-d-' ]
 then
 	# debug output with -d switch
-	conda run -n py2test --live-stream gunicorn --pid $PIDFILE --config gunicorn.conf.py app:app
+	conda run -n CNSA266-Final-py3 --live-stream gunicorn --pid $PIDFILE --config gunicorn.conf.py app:app
+#	rm $PIDFILE
 else
-	conda run -n py2test gunicorn --pid $PIDFILE --config gunicorn.conf.py app:app
+	conda run -n CNSA266-Final-py3 gunicorn --pid $PIDFILE --config gunicorn.conf.py app:app
+#	rm $PIDFILE
 fi
 
 

@@ -1,7 +1,7 @@
 from multiprocessing import cpu_count
 
 # base options
-bind = '100.103.188.37'
+bind = '100.103.188.37:5000'
 workers = cpu_count() * 2 + 1
 
 # debug options
