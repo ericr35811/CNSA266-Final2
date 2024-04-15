@@ -30,7 +30,7 @@ def index():
 	if not (cpulog.running or appstate.connected):
 		appstate.connected = True
 		print('user connected')
-		return render_template('main.html')
+		return render_template('cputest.html')
 	else:
 		print('user already connected')
 		return 'too many connections'

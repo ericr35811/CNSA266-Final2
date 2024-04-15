@@ -1,0 +1,14 @@
+<div class="card">
+    <div class="card-header">
+        Select Sensors
+    </div>
+    <div class="card-body">
+        <h4>Hello, {{ name }}</h4>
+        
+        <div class="d-block">
+            {% for sensor in sensors %}
+            <input type="checkbox" value="{{sensor}}"/>&nbsp;{{sensor}}<br/>
+            {% endfor %}
+        </div>
+    </div>
+</div>
