@@ -1,0 +1,11 @@
+<div class="card mx-auto">
+    <div class="card-header">
+        {% block header %}{% endblock %}
+    </div>
+    <div class="card-body">
+        {% block body %}{% endblock %}
+        {% if back_buttons %}
+        <input type="button"
+        {% endif %}
+    </div>
+</div>

@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, session, Response, redirect
+from flask import Flask, render_template, request, session, Response, redirect, jsonify
 from socket import gethostname
 from flask_socketio import SocketIO, emit
 from cpuusage import CpuUsage
@@ -18,15 +18,35 @@ socketio = SocketIO(app, logger=app.logger, engineio_logger=app.logger)
 # 		return Response(f.read(), mimetype='text/javascript')
 
 
+class Dummy:
+	def __init__(self):
+		self.sensors = {'1': 'da alterlator', '2': 'da sparktubes', '3':'da belt milk'}
+
+
+dummy = Dummy()
+
+
 @app.route('/')
 def index():
 	return render_template('main.html')
 
 
-@app.route('/card/selectsensors')
-def selectsensors():
-	return render_template('card/selectsensors.html', name='BALLSACK',
-						   sensors=['da alterlator', 'da sparktubes', 'da belt milk'])
+@app.route('/templates/card/selectsensors.html')
+def card_selectsensors():
+	return render_template('card/selectsensors.html', sensors=dummy.sensors)
+
+
+@app.route('/forms/selectsensors', methods=['POST'])
+def form_selectsensors():
+	if request.method == 'POST':
+		selected = request.form.getlist('chkSensors')
+		sensors = {key: dummy.sensors[key] for key in selected}
+		return render_template('card/logging.html', sensors=sensors, sensorsjson=sensors)
+
+
+# @app.route('/templates/card/logging.html')
+# def card_logging():
+# 	return render_template('card/logging.html', sensors=dummy.sensors)
 
 
 # https://stackoverflow.com/questions/34066804/disabling-caching-in-flask
@@ -49,4 +69,4 @@ if __name__ == '__main__':
 
 	# app.run(host=ip)
 	app.logger.setLevel('DEBUG')
-	socketio.run(app, host=ip, allow_unsafe_werkzeug=True)
+	socketio.run(app, host=ip, allow_unsafe_werkzeug=True, debug=True)

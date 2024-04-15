@@ -1,29 +1,37 @@
-var socket = io();
+var socketio = io();
 var maxPoints = 10;
 var intv;
 
-const ctx2 = document.getElementById('cpuChart');
-const lineChart = new Chart(ctx2, {
-    type: 'line',
-    data: {
-        //labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
-        labels: [],
-        datasets: [{
-            label: 'CPU load',
-            data: [],
-            borderWidth: 1
-        }]
-    },
-    options: {
-        scales: {
-            y: {
-                beginAtZero: true,
-                min: 0,
-                max: 100
+function CreateChart(canvasId, label, min, max) {
+    const ctx = $(canvasId);
+    var chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            //labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
+            labels: Array.from(Array(maxPoints), () => ""),
+            datasets: [{
+                label: label,
+                data: Array.from(Array(maxPoints), () => 0),
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    min: min,
+                    max: max
+                }
             }
         }
-    }
-});
+    });
+
+    return chart;
+}
+
+function navCard(path) {
+    $('#Content').load(path)
+}
 
 function setIntv() {
     // get the value from the txtInterval control
@@ -34,34 +42,22 @@ function setIntv() {
     //     clearInterval(intv);
     //     intv = setInterval(updateCpu, num);
 
-        socket.emit('setInterval', num)
+        socketio.emit('setInterval', num)
     }
-
-
 }
 
-function clearIntv() {
-    clearInterval(intv)
-}
-
-function setMaxPoints() {
+function setMaxPoints(chart) {
     // fill chart with blank data
     var num = $("#txtMaxPoints").val();
     // if value is an integer:
     num = parseInt(num)
     if (!isNaN(num)) {
         maxPoints = num;
-        lineChart.data.labels = Array.from(Array(num), () => "")
-        lineChart.data.datasets[0].data = Array.from(Array(num), () => 0);
+
     }
 }
 
-function updateCpu() {
-    //frmTime.submit();
-    socket.emit('getcpu')
-}
-
-socket.on('sendcpu', (data) => {
+socketio.on('sendcpu', (data) => {
     console.log(data);
 
     // parse data

@@ -1,14 +1,38 @@
-<div class="card">
+<script>
+    // submit form without refreshing the page
+    $(document).ready(function() {
+        $('#frmSelectSensors').submit(function(event) {
+            event.preventDefault();
+            $.post({
+                url: '/forms/selectsensors',
+                data: $('#frmSelectSensors').serialize(),
+                success: function(data) {
+                    $('#Content').html(data)
+                }
+            })
+        })
+    })
+
+</script>
+
+<div class="card mx-auto">
     <div class="card-header">
         Select Sensors
     </div>
     <div class="card-body">
-        <h4>Hello, {{ name }}</h4>
-        
-        <div class="d-block">
-            {% for sensor in sensors %}
-            <input type="checkbox" value="{{sensor}}"/>&nbsp;{{sensor}}<br/>
-            {% endfor %}
-        </div>
+        <h4>Select sensors to monitor:</h4>
+
+        <form id="frmSelectSensors" method="post" action="/forms/selectsensors">
+            <div class="d-block pb-2">
+                {% for i in sensors.keys() %}
+                <input type="checkbox" name="chkSensors" value="{{i}}"/>&nbsp;{{sensors[i]}}<br/>
+                {% endfor %}
+            </div>
+
+            <div class="d-flex">
+                <input type="submit" id="btnStart" value="Start"/>
+                <input type="button" id="btnBack" value="Back" onclick="navCard('/static/card/start.html')" class="ms-auto"/>
+            </div>
+        </form>
     </div>
 </div>
