@@ -1,0 +1,30 @@
+<div class="card mx-auto">
+    <div class="card-header">
+        Live Data
+    </div>
+    <div class="card-body">
+        <div class="d-flex flex-wrap justify-content-center" style="gap: 1rem">
+            {% for sensor in sensors %}
+            <div class="justify-content-center mx-auto" >
+                <h6>{{sensor['name']}}</h6>
+                <canvas id="chart_{{sensor['id']}}" class="Chart" ></canvas>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="d-flex">
+            <input type="button" id="btnStart" onclick="" value="Start"/>
+{#            <input class="ms-auto" type="button" id="btnBack" value="Back" onclick="navCard('/static/card/start.html')"/>#}
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA==" crossorigin="anonymous"></script>
+
+<script>
+    var socketio = io();
+    sensors = {{ sensors | tojson }};
+    for (sensor of sensors) {
+        CreateChart($('#chart_' + sensor.id), sensor.name, 0, 100)
+    }
+</script>

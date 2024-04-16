@@ -1,0 +1,27 @@
+<div class="card mx-auto">
+    <div class="card-header">
+        Welcome
+    </div>
+    <div class="card-body">
+        <h4>Welcome to OBD Viewer</h4>
+
+        <p>
+            Choose an option below to get started.
+        </p>
+
+        <div class="d-inline-block">
+            <input type="button" id="btnLiveData" value="Show live data" onclick="navCard('/templates/card/selectsensors.html')" />
+            <input type="button" id="btnGetDtc" value="Get trouble codes" onclick=""/>
+        </div>
+    </div>
+
+    <script>
+        // disable buttons until WebSocket connection is established
+        $('input[type="button"]').prop('enabled', false)
+
+        socketio.on('connect', function() {
+            $('input[type="button"]').prop('enabled', true)
+
+        })
+    </script>
+</div>
