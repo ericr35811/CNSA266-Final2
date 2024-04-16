@@ -20,7 +20,22 @@ socketio = SocketIO(app, logger=app.logger, engineio_logger=app.logger)
 
 class Dummy:
 	def __init__(self):
-		self.sensors = {'1': 'da alterlator', '2': 'da sparktubes', '3':'da belt milk'}
+		self.sensors = [
+			{
+				'id': '1',
+				'name': 'da alterlator'
+			},
+
+			{
+				'id': '2',
+				'name': 'da sparktubes'
+			},
+
+			{
+				'id': '3',
+				'name': 'da belt milk'
+			}
+		]
 
 
 dummy = Dummy()
@@ -40,8 +55,9 @@ def card_selectsensors():
 def form_selectsensors():
 	if request.method == 'POST':
 		selected = request.form.getlist('chkSensors')
-		sensors = {key: dummy.sensors[key] for key in selected}
-		return render_template('card/logging.html', sensors=sensors, sensorsjson=sensors)
+		#sensors = {key: dummy.sensors[key] for key in selected}
+		sensors = [s for s in dummy.sensors if s['id'] in selected]
+		return render_template('card/logging.html', sensors=sensors)
 
 
 # @app.route('/templates/card/logging.html')
@@ -63,8 +79,8 @@ if __name__ == '__main__':
 	# app.run(debug=True)
 
 	if gethostname() == 'raspberrypi':
-		#ip = '100.103.188.37'
-		ip = '10.42.0.1'
+		ip = '100.103.188.37'
+		#ip = '10.42.0.1'
 	else:
 		ip = '127.0.0.1'
 

@@ -24,8 +24,8 @@
 
         <form id="frmSelectSensors" method="post" action="/forms/selectsensors">
             <div class="d-block pb-2">
-                {% for i in sensors.keys() %}
-                <input type="checkbox" name="chkSensors" value="{{i}}"/>&nbsp;{{sensors[i]}}<br/>
+                {% for sensor in sensors %}
+                <input type="checkbox" name="chkSensors" value="{{sensor['id']}}"/>&nbsp;{{sensor['name']}}<br/>
                 {% endfor %}
             </div>
 

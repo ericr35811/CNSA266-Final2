@@ -4,10 +4,10 @@
     </div>
     <div class="card-body">
         <div class="d-flex flex-wrap justify-content-center" style="gap: 1rem">
-            {% for i in sensors.keys() %}
+            {% for sensor in sensors %}
             <div class="justify-content-center mx-auto" >
-                <h6>{{sensors[i]}}</h6>
-                <canvas id="chart_{{i}}" class="Chart" ></canvas>
+                <h6>{{sensor['name']}}</h6>
+                <canvas id="chart_{{sensor['id']}}" class="Chart" ></canvas>
             </div>
             {% endfor %}
         </div>
@@ -20,6 +20,8 @@
 </div>
 
 <script>
-    charts = {{ sensorsjson }}
-    //CreateChart('#chart_{{ i }}', '{{ sensors[i] }}', 0, 100)
+    sensors = {{ sensors | tojson }};
+    for (sensor of sensors) {
+        CreateChart($('#chart_' + sensor.id), sensor.name, 0, 100)
+    }
 </script>

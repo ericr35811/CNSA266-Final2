@@ -1,37 +1,40 @@
 var socketio = io();
-var maxPoints = 10;
 var intv;
 
-function CreateChart(canvasId, label, min, max) {
-    const ctx = $(canvasId);
-    var chart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            //labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
-            labels: Array.from(Array(maxPoints), () => ""),
-            datasets: [{
-                label: label,
-                data: Array.from(Array(maxPoints), () => 0),
-                borderWidth: 1
-            }]
-        },
-        options: {
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    min: min,
-                    max: max
+
+ var maxPoints = 10;
+    function CreateChart(ctx, label, min, max) {
+        //const ctx = document.getElementById(canvasId)
+        var chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                //labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
+                labels: Array.from(Array(maxPoints), () => ""),
+                datasets: [{
+                    label: label,
+                    data: Array.from(Array(maxPoints), () => 0),
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        min: min,
+                        max: max
+                    }
                 }
             }
-        }
-    });
+        });
 
-    return chart;
-}
+        return chart;
+    }
 
 function navCard(path) {
     $('#Content').load(path)
 }
+
+
 
 function setIntv() {
     // get the value from the txtInterval control
