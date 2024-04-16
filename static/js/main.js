@@ -1,17 +1,13 @@
-var intv;
-
-
- var maxPoints = 10;
-function CreateChart(ctx, label, min, max) {
+function CreateChart(ctx, label, min, max, length) {
     //const ctx = document.getElementById(canvasId)
     var chart = new Chart(ctx, {
         type: 'line',
         data: {
             //labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
-            labels: Array.from(Array(maxPoints), () => ""),
+            labels: Array.from(Array(length), () => ""),
             datasets: [{
                 label: label,
-                data: Array.from(Array(maxPoints), () => 0),
+                data: Array.from(Array(length), () => 0),
                 borderWidth: 1
             }]
         },
@@ -43,7 +39,7 @@ function checkInt(ctlId, callback) {
     //     clearInterval(intv);
     //     intv = setInterval(updateCpu, num);
 
-        callback();
+        callback(num);
         //socketio.emit('setInterval', num)
     }
 }

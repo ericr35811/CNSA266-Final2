@@ -24,7 +24,7 @@
 
     sensors = {{ sensors | tojson }};
     for (sensor of sensors) {
-        CreateChart($('#chart_' + sensor.id), sensor.name, 0, 100)
+        CreateChart($('#chart_' + sensor.id), sensor.name, 0, 100, 40)
     }
 
     socketio.on('connect', function () {
