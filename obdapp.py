@@ -75,6 +75,11 @@ def add_header(response):
 	return response
 
 
+@socketio.on('connect')
+def onconnect():
+	print('socketio client connected')
+
+
 if __name__ == '__main__':
 	# app.run(debug=True)
 
