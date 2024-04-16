@@ -15,7 +15,7 @@ socketio = SocketIO(app, logger=app.logger, engineio_logger=app.logger)
 # @app.route('/static/js/<filename>')
 # def js(filename):
 # 	with open('templates/static/js/' + filename) as f:
-# 		return Response(f.read(), mimetype='text/javascript')
+# 		return Response(f.read(), mimetype='text		ip = '10.42.0.1'/javascript')
 
 
 class Dummy:
@@ -63,7 +63,8 @@ if __name__ == '__main__':
 	# app.run(debug=True)
 
 	if gethostname() == 'raspberrypi':
-		ip = '100.103.188.37'
+		#ip = '100.103.188.37'
+		ip = '10.42.0.1'
 	else:
 		ip = '127.0.0.1'
 
