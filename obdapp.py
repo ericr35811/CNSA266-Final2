@@ -65,7 +65,6 @@ def form_selectsensors():
 		sensors = [s for s in dummy.sensors if s['id'] in selected]
 		return render_template('card/logging.html', sensors=sensors)
 
-
 # @app.route('/templates/card/logging.html')
 # def card_logging():
 # 	return render_template('card/logging.html', sensors=dummy.sensors)
@@ -98,6 +97,9 @@ def start_logging():
 	obd.start()
 
 
+@socketio.on('get_sensors')
+def get_sensors():
+	obd.get_sensors()
 
 if __name__ == '__main__':
 	# app.run(debug=True)

@@ -35,4 +35,11 @@
             </div>
         </form>
     </div>
+    <script>
+        socketio.on('send_sensors', (data) => {
+            console.log(data)
+        })
+
+        socketio.emit('get_sensors')
+    </script>
 </div>
