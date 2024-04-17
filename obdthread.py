@@ -45,8 +45,13 @@ class OBDReader:
 		self.running = False
 		self.ev_running.clear()
 
-	def connect(self,):
+	def connect(self):
+		print('Connecting to OBD device...')
 		self.connection = OBD()
+		if self.connection.status() == OBDStatus.CAR_CONNECTED:
+			print('Connected to car')
+		else:
+			print('Not connected:', self.connection.status())
 
 	def _get_sensors(self):
 		response = self.connection.query(obd_commands.PIDS_A)
