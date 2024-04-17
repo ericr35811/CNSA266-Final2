@@ -2,8 +2,9 @@ from flask import Flask, render_template, request, session, Response, redirect, 
 from socket import gethostname
 from flask_socketio import SocketIO, emit
 from cpuusage import CpuUsage
-
-# import obd
+import logging, logging.handlers
+from queue import Queue
+from obdthread import OBDReader
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'RAAAH SECRET'
@@ -39,6 +40,11 @@ class Dummy:
 
 
 dummy = Dummy()
+
+obd = OBDReader(socketio)
+socketio.start_background_task(obd.thread)
+
+logging.getLogger().addHandler(logging.StreamHandler())
 
 
 @app.route('/')
@@ -80,6 +86,19 @@ def onconnect():
 	print('socketio client connected')
 
 
+@socketio.on('car_connect')
+def car_connect():
+	print('Connecting to car')
+	obd.connect()
+	return True
+
+
+@socketio.on('start_logging')
+def start_logging():
+	obd.start()
+
+
+
 if __name__ == '__main__':
 	# app.run(debug=True)
 
@@ -91,4 +110,4 @@ if __name__ == '__main__':
 
 	# app.run(host=ip)
 	app.logger.setLevel('DEBUG')
-	socketio.run(app, host=ip, allow_unsafe_werkzeug=True, debug=True)
+	socketio.run(app, host=ip, allow_unsafe_werkzeug=True, debug=False)
