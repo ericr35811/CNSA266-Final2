@@ -14,20 +14,14 @@
 
         <div class="d-flex">
             <input type="button" id="btnStart" onclick="" value="Start"/>
-{#            <input class="ms-auto" type="button" id="btnBack" value="Back" onclick="navCard('/static/card/start.html')"/>#}
+            <input class="ms-auto" type="button" id="btnBack" value="Back" onclick="navCard('/static/card/start.html')"/>
         </div>
     </div>
 </div>
 
 <script>
-    var socketio = io();
-
     sensors = {{ sensors | tojson }};
     for (sensor of sensors) {
         CreateChart($('#chart_' + sensor.id), sensor.name, 0, 100, 40)
     }
-
-    socketio.on('connect', function () {
-       console.log('socketio server connected')
-    });
 </script>
