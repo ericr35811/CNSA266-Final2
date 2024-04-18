@@ -24,25 +24,33 @@
 </div>
 
 <script>
+    var charts = [];
+    var maxPoints = 20;
+
+    var sensors = {{ sensors|tojson }};
+
+    for (var sensor of sensors) {
+        charts[sensor.pid] = CreateChart(
+            $('#chart_' + sensor.pid),
+            sensor.name,
+            0, 100, maxPoints
+        )
+    }
+
     socketio.on('send_data', (data) => {
         for (sensor of data) {
+            console.log(sensor)
             updateChart(
-                $('#chart_' + sensor.pid),
-                sensor
+                charts[sensor.pid],
+                sensor.val,
+                sensor.elapsed
             )
         }
-
-
-
-    })
+    });
 
     function btnStart() {
         socketio.emit('start_logging')
     }
 
-    {% if sensors|length > 0 %}
-        {% for sensor in sensors %}
-    CreateChart($('#chart_' + '{{ sensor.pid }}'), '{{ sensor.name }}', 0, 100, 40)
-        {% endfor %}
-    {% endif %}
+
 </script>

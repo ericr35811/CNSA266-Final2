@@ -1,17 +1,18 @@
 var socketio = io();
 var sock;
+var maxPoints = 20;
 
 
-function CreateChart(ctx, label, min, max, length) {
+function CreateChart(ctx, label, min, max) {
     //const ctx = document.getElementById(canvasId)
     var chart = new Chart(ctx, {
         type: 'line',
         data: {
             //labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
-            labels: Array.from(Array(length), () => ""),
+            labels: Array.from(Array(maxPoints), () => ""),
             datasets: [{
                 //label: label,
-                data: Array.from(Array(length), () => 0),
+                data: Array.from(Array(maxPoints), () => 0),
                 borderWidth: 1
             }]
         },
@@ -53,7 +54,6 @@ function updateChart(chart, val, time) {
     // get  linechart axes
     var xAxis = chart.data.labels;
     var yAxis = chart.data.datasets[0].data;
-    var maxPoints = chart.maxPoints;
 
     // add new data to chart
     xAxis.push(time);

@@ -19,6 +19,7 @@ socketio = SocketIO(app, logger=app.logger, engineio_logger=app.logger)
 # CarConnection monitors the OBD connection, and DataLogger reads data from the car
 # These are background tasks because they would freeze the web server
 # the threads are controlled via the classes
+# obd = CarConnection(socketio, test=True)
 obd = CarConnection(socketio, test=True)
 data_logger = DataLogger(obd, socketio)
 

@@ -161,7 +161,7 @@ class DataLogger:
 					{
 						'pid': sensor['pid'],
 						'val': round(cpu_percent(), 2),
-						'elapsed': time() - self.t0
+						'elapsed': round(time() - self.t0, 2)
 					}
 					for sensor in self.sensors
 				]
