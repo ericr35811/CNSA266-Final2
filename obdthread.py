@@ -58,7 +58,8 @@ class OBDReader:
 
 	def _connect(self):
 		# waits until connecting is done
-		self.connection = OBD(baudrate=9600, portstr='COM3', timeout=1)
+		#self.connection = OBD(baudrate=9600, portstr='COM3', timeout=1)
+		self.connection = OBD()
 		if self.connection.status() == OBDStatus.CAR_CONNECTED:
 			print('Connected to car')
 			self.socketio.emit('car_connect_status', {'status': True})
