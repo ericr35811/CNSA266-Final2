@@ -1,3 +1,7 @@
+var socketio = io();
+var sock;
+
+
 function CreateChart(ctx, label, min, max, length) {
     //const ctx = document.getElementById(canvasId)
     var chart = new Chart(ctx, {
@@ -6,7 +10,7 @@ function CreateChart(ctx, label, min, max, length) {
             //labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
             labels: Array.from(Array(length), () => ""),
             datasets: [{
-                label: label,
+                //label: label,
                 data: Array.from(Array(length), () => 0),
                 borderWidth: 1
             }]
@@ -19,7 +23,8 @@ function CreateChart(ctx, label, min, max, length) {
                     max: max
                 }
             }
-        }
+        },
+        maxPoints: length
     });
 
     return chart;
@@ -44,43 +49,25 @@ function checkInt(ctlId, callback) {
     }
 }
 
-function setMaxPoints(chart) {
-    // fill chart with blank data
-    var num = $("#txtMaxPoints").val();
-    // if value is an integer:
-    num = parseInt(num)
-    if (!isNaN(num)) {
-        maxPoints = num;
+function updateChart(chart, val, time) {
+    // get  linechart axes
+    var xAxis = chart.data.labels;
+    var yAxis = chart.data.datasets[0].data;
+    var maxPoints = chart.maxPoints;
 
-    }
+    // add new data to chart
+    xAxis.push(time);
+    yAxis.push(val);
+
+    // limit chart data points
+    if (xAxis.length >= maxPoints)
+        chart.data.labels = xAxis.slice(xAxis.length - maxPoints, xAxis.length);
+    if (xAxis.length >= maxPoints)
+        chart.data.datasets[0].data = yAxis.slice(yAxis.length - maxPoints, yAxis.length);
+
+    // update with no animation
+    chart.update('none');
 }
-
-function onDataReceive() {
-
-}
-
-// socketio.on('sendcpu', (data) => {
-//     var t = data.elapsed;
-//     var y = data.percent;
-//
-//     // get  linechart axes
-//     var xAxis = lineChart.data.labels;
-//     var yAxis = lineChart.data.datasets[0].data;
-//
-//     // add new data to chart
-//     xAxis.push(t);
-//     yAxis.push(y);
-//
-//     // limit chart to 20 data points?
-//     if (xAxis.length >= maxPoints)
-//         lineChart.data.labels = xAxis.slice(xAxis.length - maxPoints, xAxis.length);
-//     if (xAxis.length >= maxPoints)
-//         lineChart.data.datasets[0].data = yAxis.slice(yAxis.length - maxPoints, yAxis.length);
-//
-//     // update with no animation
-//     lineChart.update('none');
-//
-// })
 
     /*$.post(
         // send POST request to localhost/cpu with no data

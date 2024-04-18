@@ -4,12 +4,16 @@
     </div>
     <div class="card-body">
         <div class="d-flex flex-wrap justify-content-center" style="gap: 1rem">
-            {% for sensor in sensors %}
-            <div class="justify-content-center mx-auto" >
-                <h6>{{sensor['name']}}</h6>
-                <canvas id="chart_{{sensor['id']}}" class="Chart" ></canvas>
-            </div>
-            {% endfor %}
+            {% if sensors|length > 0 %}
+                {% for sensor in sensors %}
+                    <div class="justify-content-center mx-auto" >
+                        <h6>{{sensor['name']}}</h6>
+                        <canvas id="chart_{{sensor['pid']}}" class="Chart" ></canvas>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p>No sensors could be loaded. Check the vehicle connection and try again.</p>
+            {% endif %}
         </div>
 
         <div class="d-flex">
@@ -20,12 +24,25 @@
 </div>
 
 <script>
+    socketio.on('send_data', (data) => {
+        for (sensor of data) {
+            updateChart(
+                $('#chart_' + sensor.pid),
+                sensor
+            )
+        }
+
+
+
+    })
+
     function btnStart() {
         socketio.emit('start_logging')
     }
 
-    sensors = {{ sensors | tojson }};
-    for (sensor of sensors) {
-        CreateChart($('#chart_' + sensor.id), sensor.name, 0, 100, 40)
-    }
+    {% if sensors|length > 0 %}
+        {% for sensor in sensors %}
+    CreateChart($('#chart_' + '{{ sensor.pid }}'), '{{ sensor.name }}', 0, 100, 40)
+        {% endfor %}
+    {% endif %}
 </script>

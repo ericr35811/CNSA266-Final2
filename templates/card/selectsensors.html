@@ -23,13 +23,39 @@
         <h4>Select sensors to monitor:</h4>
 
         <form id="frmSelectSensors" method="post" action="/forms/selectsensors">
-            <div class="d-block pb-2">
-                {% for sensor in sensors %}
-                <input type="checkbox" name="chkSensors" value="{{sensor['id']}}"/>&nbsp;{{sensor['name']}}<br/>
-                {% endfor %}
+            <div id="sensorList" class="d-block pb-2">
+                {% if sensors|length > 0 %}
+                    <table>
+                        <thead>
+                            <th></th>
+                            <th>PID</th>
+                            <th>Name</th>
+                            <th>Description</th>
+                        </thead>
+                        <tbody>
+                            {% for sensor in sensors %}
+                                <tr>
+                                    <td>
+                                        <input type="checkbox" name="chkSensors" value="{{ sensor['pid'] }}"/>
+                                    </td>
+                                    <td>
+                                        {{ sensor['pid'] }}
+                                    </td>
+                                    <td>
+                                        {{ sensor['name'] }}
+                                    </td>
+                                    <td>
+                                        {{ sensor['desc'] }}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p>No sensors could be loaded. Check the vehicle connection and try again.</p>
+                {% endif %}
             </div>
 
-            <div id="sensorList" class="d-block pb-2"></div>
 
             <div class="d-flex">
                 <input type="submit" id="btnStart" value="Start"/>
@@ -37,11 +63,4 @@
             </div>
         </form>
     </div>
-    <script>
-        socketio.on('ready_sensors', () => {
-            $('#sensorList').load('/templates/card/sensorlist.html')
-        })
-
-        socketio.emit('get_sensors')
-    </script>
 </div>
