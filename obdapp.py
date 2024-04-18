@@ -4,7 +4,7 @@ from flask_socketio import SocketIO, emit
 from cpuusage import CpuUsage
 import logging, logging.handlers
 from queue import Queue
-from obdthread import OBDReader
+from obdthread import DataLogger
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'RAAAH SECRET'
@@ -41,8 +41,8 @@ class Dummy:
 
 dummy = Dummy()
 
-obd = OBDReader(socketio)
-socketio.start_background_task(obd.thread)
+obd = DataLogger(socketio)
+socketio.start_background_task(obd.log_thread)
 
 logging.getLogger().addHandler(logging.StreamHandler())
 
