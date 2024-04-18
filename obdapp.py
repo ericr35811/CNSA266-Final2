@@ -65,6 +65,11 @@ def form_selectsensors():
 		sensors = [s for s in dummy.sensors if s['id'] in selected]
 		return render_template('card/logging.html', sensors=sensors)
 
+
+@app.route('/templates/card/sensorlist.html')
+def sensorlist():
+	return render_template('card/sensorlist.html', sensors=obd.get_sensors())
+
 # @app.route('/templates/card/logging.html')
 # def card_logging():
 # 	return render_template('card/logging.html', sensors=dummy.sensors)
@@ -85,6 +90,11 @@ def onconnect():
 	print('socketio client connected')
 
 
+@socketio.on('car_disconnect')
+def car_disconnect():
+	print('Disconnecting from car')
+	obd.disconnect()
+
 @socketio.on('car_connect')
 def car_connect():
 	print('Connecting to car')
@@ -99,7 +109,8 @@ def start_logging():
 
 @socketio.on('get_sensors')
 def get_sensors():
-	obd.get_sensors()
+	# obd.get_sensors()
+	socketio.emit('ready_sensors')
 
 if __name__ == '__main__':
 	# app.run(debug=True)

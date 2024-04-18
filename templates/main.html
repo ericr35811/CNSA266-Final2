@@ -15,6 +15,7 @@
         <div class="me-3"><a href="/">OBD Viewer</a></div>
         <div class="me-3">
             <input type="button" id="btnConnect" onclick="btnConnect()" value="Connect to car">
+            <input type="button" id="btnDisconnect" onclick="btnDisconnect()" value="Disconnect">
             <span id="carConnectStatus"></span>
         </div>
         <div class="ms-auto">
@@ -42,22 +43,25 @@
             $('#rPiConnection').html('🔴')
         })
 
+        socketio.on('car_connect_status', (data) => {
+            if (data.status) {
+                $('#carConnectStatus').html('🟢')
+            }
+            else {
+                $('#carConnectStatus').html('🔴 ' + data.msg)
+            }
+
+            return true;
+        })
+
         function btnConnect() {
             $('#carConnectStatus').html('Connecting...');
 
-            socketio.on('car_connect_status', (data) => {
-                if (data.status) {
-                    $('#carConnectStatus').html('🟢')
-                }
-                else {
-                    $('#carConnectStatus').html('🔴 ' + data.msg)
-                }
-
-                return true;
-            })
-
             socketio.emit('car_connect')
+        }
 
+        function btnDisconnect() {
+            socketio.emit('car_disconnect')
         }
     </script>
 </body>

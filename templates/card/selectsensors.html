@@ -29,6 +29,8 @@
                 {% endfor %}
             </div>
 
+            <div id="sensorList" class="d-block pb-2"></div>
+
             <div class="d-flex">
                 <input type="submit" id="btnStart" value="Start"/>
                 <input type="button" id="btnBack" value="Back" onclick="navCard('/static/card/start.html')" class="ms-auto"/>
@@ -36,8 +38,8 @@
         </form>
     </div>
     <script>
-        socketio.on('send_sensors', (data) => {
-            console.log(data)
+        socketio.on('ready_sensors', () => {
+            $('#sensorList').load('/templates/card/sensorlist.html')
         })
 
         socketio.emit('get_sensors')
