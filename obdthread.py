@@ -138,13 +138,8 @@ class DataLogger:
 		self.sensors = sensors
 
 	def _log(self):
-		# stopped here
-		if self.connection.connected() or self.connection.test:
+		if self.connection.test:
 			if self.sensors is not None:
-				# ---- test
-
-				# ---------
-
 				cpu = cpu_percent(percpu=True)
 				data = [
 					{
@@ -159,9 +154,29 @@ class DataLogger:
 				self.socketio.sleep(self.rate)
 			else:
 				print('DataLogger: No sensors to read')
+
 		else:
-			print('DataLogger: OBD not connected')
-			self.stop()
+			if self.connection.connected() or self.connection.test:
+				if self.sensors is not None:
+					data = []
+					# ---- test
+					for sensor in self.sensors:
+						r = self.connection.obd.query(obd_commands[1][sensor['pid']])
+						print('%20s: %s' % (sensor['name'], str(r.value)))
+						data.append({
+							'pid': sensor['pid'],
+							'val': str(r.value),
+							'elapsed': round(time() - self.t0, 2)
+						})
+					# ---------
+
+					# self.socketio.emit('send_data', data)
+					self.socketio.sleep(self.rate)
+				else:
+					print('DataLogger: No sensors to read')
+			else:
+				print('DataLogger: OBD not connected')
+				self.stop()
 
 	def thread(self):
 		while True:

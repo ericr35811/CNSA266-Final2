@@ -1,9 +1,6 @@
 from flask import Flask, render_template, request, session, Response, redirect, jsonify
 from socket import gethostname
 from flask_socketio import SocketIO, emit
-from cpuusage import CpuUsage
-import logging, logging.handlers
-from queue import Queue
 from obdthread import DataLogger, CarConnection
 from atexit import register as atexit_register
 from signal import signal, SIGINT
@@ -24,7 +21,6 @@ socketio = SocketIO(app, logger=app.logger, engineio_logger=app.logger, async_mo
 # CarConnection monitors the OBD connection, and DataLogger reads data from the car
 # These are background tasks because they would freeze the web server
 # the threads are controlled via the classes
-# obd = CarConnection(socketio, test=True)
 obd = CarConnection(socketio, test=True)
 data_logger = DataLogger(obd, socketio)
 
