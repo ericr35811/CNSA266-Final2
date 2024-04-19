@@ -76,14 +76,19 @@ function updateChart(chart, val, time) {
     var yAxis = chart.data.datasets[0].data;
 
     // add new data to chart
-    xAxis.push(time);
-    yAxis.push(val);
+//    xAxis.push(time);
+ //   yAxis.push(val);
+    xAxis.unshift(time);
+    yAxis.unshift(val);
 
     // limit chart data points
     if (xAxis.length >= maxPoints)
-        chart.data.labels = xAxis.slice(xAxis.length - maxPoints, xAxis.length);
+//        chart.data.labels = xAxis.slice(xAxis.length - maxPoints, xAxis.length);
+        chart.data.labels = xAxis.slice(0, maxPoints);
+
     if (xAxis.length >= maxPoints)
-        chart.data.datasets[0].data = yAxis.slice(yAxis.length - maxPoints, yAxis.length);
+//        chart.data.datasets[0].data = yAxis.slice(yAxis.length - maxPoints, yAxis.length);
+        chart.data.datasets[0].data = yAxis.slice(0, maxPoints);
 
     // update with no animation
     chart.update('none');
