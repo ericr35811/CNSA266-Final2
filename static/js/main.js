@@ -2,33 +2,53 @@ var socketio = io();
 var sock;
 var maxPoints = 20;
 
-
 function CreateChart(ctx, label, min, max) {
     //const ctx = document.getElementById(canvasId)
     var chart = new Chart(ctx, {
         type: 'line',
         data: {
             //labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
-            labels: Array.from(Array(maxPoints), () => ""),
+            labels: [],
             datasets: [{
                 //label: label,
-                data: Array.from(Array(maxPoints), () => 0),
-                borderWidth: 1
+                data: [],
+                borderWidth: 3,
+                pointStyle: false
             }]
         },
         options: {
             scales: {
+                x: {
+                  ticks: {
+                      maxTicksLimit: maxPoints / 4
+                  }
+                },
                 y: {
                     beginAtZero: true,
                     min: min,
                     max: max
                 }
-            }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                },
+            },
         },
+
         maxPoints: length
     });
 
+    // fill the datasets on creation
+    clearChart(chart);
+
     return chart;
+}
+
+function clearChart(chart) {
+    chart.data.labels = Array.from(Array(maxPoints), () => "");
+    chart.data.datasets[0].data = Array.from(Array(maxPoints), () => 0);
+    chart.update('none');
 }
 
 function navCard(path) {

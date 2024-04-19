@@ -82,9 +82,19 @@ def car_connect():
 	return True
 
 
-@socketio.on('start_logging')
+@socketio.on('log_start')
 def start_logging():
 	data_logger.start()
+
+
+@socketio.on('log_stop')
+def stop_logging():
+	data_logger.stop()
+
+
+@socketio.on('log_rate')
+def log_rate(rate):
+	data_logger.rate = float(rate)
 
 
 if __name__ == '__main__':

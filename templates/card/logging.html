@@ -18,7 +18,13 @@
 
         <div class="d-flex">
             <input type="button" id="btnStart" onclick="btnStart()" value="Start"/>
-            <input class="ms-auto" type="button" id="btnBack" value="Back" onclick="navCard('/static/card/start.html')"/>
+            <input type="button" id="btnStop" onclick="btnStop()" value="Stop">
+            <input type="button" id="btnClear" onclick="btnClear()" value="Clear">
+
+            <label for="txtRate">Polling rate</label>
+            <input type="text" id="txtRate" onchange="txtRate()" value="0.5">
+
+            <input class="ms-auto" type="button" id="btnBack" value="Back" onclick="navCard('/templates/card/selectsensors.html')"/>
         </div>
     </div>
 </div>
@@ -49,7 +55,22 @@
     });
 
     function btnStart() {
-        socketio.emit('start_logging')
+        socketio.emit('log_start')
+    }
+
+    function btnStop() {
+        socketio.emit('log_stop')
+    }
+
+    function btnClear() {
+        for (var i in charts) {
+            clearChart(charts[i]);
+        }
+    }
+
+    function txtRate() {
+        socketio.emit('log_rate', $('#txtRate').val())
+
     }
 
 
