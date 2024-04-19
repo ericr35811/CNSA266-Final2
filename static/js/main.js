@@ -56,18 +56,25 @@ function navCard(path) {
 }
 
 
-function checkInt(ctlId, callback) {
+function checkTxt(ctlId, type, cb_success, cb_fail) {
+    if (!cb_success) cb_success = (num) => {console.log(ctlId + ': ' + num)}
+    if (!cb_fail) cb_fail = () => {console.log(ctlId + ': must be an int')}
     // get the value from the txtInterval control
-    var num = $("#txtInterval").val();
-    // if value is an integer:
-    num = parseInt(num)
-    if (!isNaN(num)) {
-    //     clearInterval(intv);
-    //     intv = setInterval(updateCpu, num);
+    var num = $(ctlId).val();
 
-        callback(num);
-        //socketio.emit('setInterval', num)
+    // if value is an integer:
+    if (type === 'int') {
+        num = parseInt(num)
     }
+    else if (type === 'float') {
+        num = parseFloat(num)
+    }
+
+    if (!isNaN(num)) {
+        console.log(ctlId + ': ' + num);
+        cb_success(num);
+    }
+    else cb_fail();
 }
 
 function updateChart(chart, val, time) {

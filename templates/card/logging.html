@@ -24,6 +24,9 @@
             <label for="txtRate">Polling rate</label>
             <input type="text" id="txtRate" onchange="txtRate()" value="0.5">
 
+            <label for="txtLength">Chart length</label>
+            <input type="text" id="txtLength" onchange="txtLength()" value="0.5">
+
             <input class="ms-auto" type="button" id="btnBack" value="Back" onclick="navCard('/templates/card/selectsensors.html')"/>
         </div>
     </div>
@@ -68,9 +71,19 @@
         }
     }
 
+    // need validation
     function txtRate() {
-        socketio.emit('log_rate', $('#txtRate').val())
+        // socketio.emit('log_rate', $('#txtRate').val())
+        checkTxt('#txtRate', 'float', (val) => {
+            socketio.emit('log_rate', val)
+        })
+    }
 
+    function txtLength() {
+        // maxPoints = $('#txtLength').val()
+        checkTxt('#txtLength', 'int', (val) => {
+            maxPoints = val;
+        })
     }
 
 
