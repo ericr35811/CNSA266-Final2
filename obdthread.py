@@ -6,17 +6,6 @@ from threading import Event, Thread
 from psutil import cpu_percent
 from time import time
 
-
-def close_threads(threads):
-	for thread in threads:
-		print('Stopping', thread[1].name, end='...')
-		# call the cleanup function
-		thread[0]()
-		# wait for the thread to finish
-		if thread[1]: thread[1].join()
-		print('stopped')
-
-
 class CarConnection:
 	def __init__(self, socketio, test=False):
 		self.obd: OBD = None
@@ -100,7 +89,7 @@ class CarConnection:
 		self.action = 'car_disconnect'
 		self.ev.set()
 
-	def connmon_thread(self):
+	def thread(self):
 		while True:
 			if self.ev.is_set():
 				if self.action == 'car_connect':
@@ -115,16 +104,16 @@ class CarConnection:
 					self.action = ''
 					self._disconnect()
 
-				elif self.action == 'app_exit':
+				elif self.action == 'exit':
 					self.ev.clear()
 					break
 			else:
 				self.action = 'monitor'
 				self._check_status()
 
-	def app_exit(self):
+	def exit(self):
 		self.disconnect()
-		self.action = 'app_exit'
+		self.action = 'exit'
 		self.ev.set()
 
 
@@ -142,13 +131,11 @@ class DataLogger:
 		self.socketio = socketio
 
 	def start(self):
-		self.running = True
-		self.t0 = time()
+		self.action = 'start'
 		self.ev.set()
 
 	def stop(self):
 		self.running = False
-		self.ev.clear()
 
 	def set_sensors(self, sensors):
 		self.sensors = sensors
@@ -157,13 +144,14 @@ class DataLogger:
 		# stopped here
 		if self.connection.connected() or self.connection.test:
 			if self.sensors is not None:
+				cpu = cpu_percent(percpu=True)
 				data = [
 					{
 						'pid': sensor['pid'],
-						'val': round(cpu_percent(), 2),
+						'val': round(cpu[i], 2),
 						'elapsed': round(time() - self.t0, 2)
 					}
-					for sensor in self.sensors
+					for i, sensor in enumerate(self.sensors)
 				]
 
 				self.socketio.emit('send_data', data)
@@ -174,19 +162,24 @@ class DataLogger:
 			print('DataLogger: OBD not connected')
 			self.stop()
 
-	def log_thread(self):
+	def thread(self):
 		while True:
 			self.ev.wait()
 
-			if self.action == 'app_exit':
+			if self.action == 'exit':
 				self.ev.clear()
 				break
 
-			while self.ev.is_set():
-				self._log()
+			elif self.action == 'start':
+				self.ev.clear()
 
-	def app_exit(self):
+				self.running = True
+				self.t0 = time()
+				while self.running:
+					self._log()
+
+	def exit(self):
 		self.stop()
-		self.action = 'app_exit'
+		self.action = 'exit'
 		self.ev.set()
 

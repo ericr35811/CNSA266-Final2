@@ -4,16 +4,21 @@ from flask_socketio import SocketIO, emit
 from cpuusage import CpuUsage
 import logging, logging.handlers
 from queue import Queue
-from obdthread import DataLogger, CarConnection, close_threads
+from obdthread import DataLogger, CarConnection
 from atexit import register as atexit_register
 from signal import signal, SIGINT
+from werkzeug.serving import BaseWSGIServer, ThreadedWSGIServer
+from time import sleep
+from sys import exit
+
+print(__name__)
 
 # create the Flask app
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'RAAAH SECRET'
 
 # create the SocketIO app based on the Flask app
-socketio = SocketIO(app, logger=app.logger, engineio_logger=app.logger)
+socketio = SocketIO(app, logger=app.logger, engineio_logger=app.logger, async_mode='threading')
 
 # instantiate classes for background tasks
 # CarConnection monitors the OBD connection, and DataLogger reads data from the car
@@ -23,21 +28,7 @@ socketio = SocketIO(app, logger=app.logger, engineio_logger=app.logger)
 obd = CarConnection(socketio, test=True)
 data_logger = DataLogger(obd, socketio)
 
-# start the threads for the background tasks
-# order matters
-threads = [
-	[data_logger.app_exit, socketio.start_background_task(data_logger.log_thread)],
-	[obd.app_exit,			socketio.start_background_task(obd.connmon_thread)]
-]
-
-# make sure to close the background threads on server shutdown
-atexit_register(lambda: close_threads(threads))
-# do the same for CTRL-C
-signal(SIGINT, lambda s, f: close_threads(threads))
-
-
 # logging.getLogger().addHandler(logging.StreamHandler())
-
 
 @app.route('/')
 def index():
@@ -105,4 +96,41 @@ if __name__ == '__main__':
 
 	# app.run(host=ip)
 	app.logger.setLevel('DEBUG')
-	socketio.run(app, host=ip, debug=True, allow_unsafe_werkzeug=True)
+	# socketio.run(app, host=ip, debug=True, allow_unsafe_werkzeug=True)
+
+	wsgi_server = ThreadedWSGIServer(app=app, host=ip, port=5000)
+
+	# create processes as SocketIO background tasks (threads)
+	t_server = socketio.start_background_task(wsgi_server.serve_forever)
+	t_connmon = socketio.start_background_task(obd.thread)
+	t_logger = socketio.start_background_task(data_logger.thread)
+
+	def clean_shutdown():
+		print("closing logger thread", end="...")
+		data_logger.exit()	# tell the thread to shut down cleanly
+		t_logger.join()		# wait for the thread to stop
+		print("done")
+
+		print("closing obd thread", end="...")
+		obd.exit()
+		t_connmon.join()
+		print("done")
+
+		print("closing server thread", end="...")
+		wsgi_server.shutdown()
+		t_server.join()
+		print("done")
+
+		exit(0)
+
+	# cleanly shut down the server on exit or on Ctrl+C
+	atexit_register(clean_shutdown)
+	signal(SIGINT, lambda s, f: clean_shutdown())
+
+	# keep this thread alive so it can c
+	while True:
+		sleep(1)
+
+
+
+
