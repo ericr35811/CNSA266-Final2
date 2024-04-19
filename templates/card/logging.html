@@ -3,11 +3,11 @@
         Live Data
     </div>
     <div class="card-body">
-        <div class="d-flex flex-wrap justify-content-center" style="gap: 1rem">
+        <div class="justify-content-center row row-cols-sm-1 row-cols-md-2 row-cols-xl-3">
             {% if sensors|length > 0 %}
                 {% for sensor in sensors %}
-                    <div class="justify-content-center mx-auto" >
-                        <h6>{{sensor['name']}}</h6>
+                    <div class="col" >
+                        <h6>{{sensor['desc']}}</h6>
                         <canvas id="chart_{{sensor['pid']}}" class="Chart" ></canvas>
                     </div>
                 {% endfor %}
@@ -17,17 +17,17 @@
         </div>
 
         <div class="d-flex">
-            <input type="button" id="btnStart" onclick="btnStart()" value="Start"/>
-            <input type="button" id="btnStop" onclick="btnStop()" value="Stop">
-            <input type="button" id="btnClear" onclick="btnClear()" value="Clear">
+            <input class='btn btn-primary me-2' type="button" id="btnStart" onclick="btnStart()" value="Start"/>
+            <input class='btn btn-primary me-2' type="button" id="btnStop" onclick="btnStop()" value="Stop">
+            <input class='btn btn-primary me-2' type="button" id="btnClear" onclick="btnClear()" value="Clear">
 
-            <label for="txtRate">Polling rate</label>
-            <input type="text" id="txtRate" onchange="txtRate()" value="0.5">
+            <label for="txtRate" class="me-2">Polling rate</label>
+            <input class='me-2' type="text" id="txtRate" onchange="txtRate()" value="0.5">
 
-            <label for="txtLength">Chart length</label>
-            <input type="text" id="txtLength" onchange="txtLength()" value="0.5">
+            <label for="txtLength" class="me-2">Chart length</label>
+            <input class="me-2" type="text" id="txtLength" onchange="txtLength()" value="20">
 
-            <input class="ms-auto" type="button" id="btnBack" value="Back" onclick="navCard('/templates/card/selectsensors.html')"/>
+            <input class="ms-auto btn btn-primary" type="button" id="btnBack" value="Back" onclick="btnStop(); navCard('/templates/card/selectsensors.html')"/>
         </div>
     </div>
 </div>
@@ -48,7 +48,6 @@
 
     socketio.on('send_data', (data) => {
         for (sensor of data) {
-            console.log(sensor)
             updateChart(
                 charts[sensor.pid],
                 sensor.val,
@@ -85,6 +84,9 @@
             maxPoints = val;
         })
     }
+
+    txtLength(); // read default values from the page
+    txtRate();
 
 
 </script>

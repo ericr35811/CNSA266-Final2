@@ -2,6 +2,7 @@ var socketio = io();
 var sock;
 var maxPoints = 20;
 
+
 function CreateChart(ctx, label, min, max) {
     //const ctx = document.getElementById(canvasId)
     var chart = new Chart(ctx, {

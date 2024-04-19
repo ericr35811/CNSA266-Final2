@@ -69,10 +69,10 @@ def onconnect():
 	socketio.emit('car_connect_status', obd.status)
 
 
-@socketio.on('car_disconnect')
-def car_disconnect():
-	print('Disconnecting from car')
-	obd.disconnect()
+@socketio.on('disconnect')
+def ondisconnect():
+	print('socketio client disconnected')
+	data_logger.stop()
 
 
 @socketio.on('car_connect')
@@ -80,6 +80,12 @@ def car_connect():
 	print('Connecting to car')
 	obd.connect()
 	return True
+
+
+@socketio.on('car_disconnect')
+def car_disconnect():
+	print('Disconnecting from car')
+	obd.disconnect()
 
 
 @socketio.on('log_start')
@@ -103,6 +109,8 @@ if __name__ == '__main__':
 		#ip = '10.42.0.1'
 	else:
 		ip = '127.0.0.1'
+
+	# ip = '100.68.132.31'
 
 	# app.run(host=ip)
 	app.logger.setLevel('DEBUG')

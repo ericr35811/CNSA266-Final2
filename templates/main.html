@@ -6,6 +6,12 @@
 	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 	<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA==" crossorigin="anonymous"></script>
+{#    <style>#}
+{#        div, canvas {#}
+{#            border: 1px solid black#}
+{#        }#}
+{#    </style>#}
+    <meta name="viewport" id="viewport_device">
 </head>
 
 <body onload="navCard('/static/card/start.html')">
@@ -14,8 +20,8 @@
     <div class="container-fluid d-flex bg-light p-3 mb-3">
         <div class="me-3"><a href="/">OBD Viewer</a></div>
         <div class="me-3">
-            <input type="button" id="btnConnect" onclick="btnConnect()" value="Connect to car">
-            <input type="button" id="btnDisconnect" onclick="btnDisconnect()" value="Disconnect">
+            <input class='btn btn-primary me-2' type="button" id="btnConnect" onclick="btnConnect()" value="Connect to car">
+            <input class='btn btn-primary me-2' type="button" id="btnDisconnect" onclick="btnDisconnect()" value="Disconnect">
             <span id="carConnectStatus"></span>
         </div>
         <div class="ms-auto">

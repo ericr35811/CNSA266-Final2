@@ -58,10 +58,7 @@ class CarConnection:
 
 		if self.test:
 			supported = {
-				obd_commands.ENGINE_LOAD,
-				obd_commands.COOLANT_TEMP,
-				obd_commands.INTAKE_PRESSURE,
-				obd_commands.RPM
+				cmd for cmd in obd_commands[1][4:12]
 			}
 
 		# create an array of dicts for each PID, to pass to the sensorlist.html template
@@ -144,6 +141,10 @@ class DataLogger:
 		# stopped here
 		if self.connection.connected() or self.connection.test:
 			if self.sensors is not None:
+				# ---- test
+
+				# ---------
+
 				cpu = cpu_percent(percpu=True)
 				data = [
 					{
