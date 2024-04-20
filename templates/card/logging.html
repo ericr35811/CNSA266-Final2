@@ -1,9 +1,13 @@
 <div class="card mx-auto">
-    <div class="card-header">
-        Live Data
+    <div class="card-header d-flex">
+        <div>Live Data</div>
+        <div class="ms-auto">
+            <label for="chkGraphs">Graphs</label>
+            <input type="checkbox" id="chkGraphs" checked="true">
+        </div>
     </div>
     <div class="card-body">
-        <div class="justify-content-center row row-cols-sm-1 row-cols-md-2 row-cols-xl-3">
+        <div class="justify-content-center row row-cols-sm-1 row-cols-md-2 row-cols-xl-3 sensorList">
             {% if sensors|length > 0 %}
                 {% for sensor in sensors %}
                     <div class="col">
@@ -39,6 +43,7 @@
 <script>
     var charts = [];
     var maxPoints = 20;
+    var wasRunning = false;
 
     // get a JSON list of the sensors to read
     var sensors = {{ sensors|tojson }};
@@ -68,10 +73,12 @@
 
     function btnStart() {
         socketio.emit('log_start')
+        wasRunning = true;
     }
 
     function btnStop() {
         socketio.emit('log_stop')
+        wasRunning = false;
     }
 
     function btnClear() {
@@ -98,6 +105,13 @@
 
     txtLength(); // read default values from the page
     txtRate();
+
+    $('#chkGraphs').click(function(event){
+        // hide the graphs
+        $('canvas').prop('hidden', !this.checked);
+        // append/remove the row-cols-1 class, which limits the display to 1 column on small devices without the graphs
+        $('.sensorList').toggleClass('row-cols-1');
+    })
 
 
 </script>

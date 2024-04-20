@@ -18,6 +18,9 @@ function CreateChart(ctx, min, max) {
             }]
         },
         options: {
+            // todo: find a way to disable resize animation
+            animation: false,
+            transitions: false,
             scales: {
                 x: {
                   ticks: {
