@@ -12,9 +12,7 @@
                             <div class="ms-auto" id="val_{{ sensor['pid'] }}">N/A</div>
                             <div>&nbsp;{{ sensor['unit'] }}</div>
                         </div>
-                        <div>
-                            <canvas id="chart_{{sensor['pid']}}" class="Chart" ></canvas>
-                        </div>
+                        <canvas id="chart_{{sensor['pid']}}" class="Chart" ></canvas>
                     </div>
                 {% endfor %}
             {% else %}
