@@ -36,16 +36,20 @@
     var charts = [];
     var maxPoints = 20;
 
+    // get a JSON list of the sensors to read
     var sensors = {{ sensors|tojson }};
 
+    // initialize each chart
     for (var sensor of sensors) {
         charts[sensor.pid] = CreateChart(
             $('#chart_' + sensor.pid),
-            sensor.name,
-            0, 100, maxPoints
+            //!! need to adjust range depending on sensor
+            0, 100
         )
     }
 
+    // handle event when the server sends new data
+    // push the new data onto each chart
     socketio.on('send_data', (data) => {
         for (sensor of data) {
             updateChart(
@@ -70,7 +74,7 @@
         }
     }
 
-    // need validation
+    // validate the logging rate text box and send an event if it succeeds
     function txtRate() {
         // socketio.emit('log_rate', $('#txtRate').val())
         checkTxt('#txtRate', 'float', (val) => {
@@ -78,6 +82,7 @@
         })
     }
 
+    // validate the graph length text box and change the local variable if it succeeds
     function txtLength() {
         // maxPoints = $('#txtLength').val()
         checkTxt('#txtLength', 'int', (val) => {

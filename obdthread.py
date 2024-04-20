@@ -56,6 +56,7 @@ class CarConnection:
 	def _get_sensors(self):
 		supported = self.obd.supported_commands
 
+		# override supported if testing
 		if self.test:
 			supported = {
 				cmd for cmd in obd_commands[1][4:12]
