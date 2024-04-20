@@ -6,9 +6,15 @@
         <div class="justify-content-center row row-cols-sm-1 row-cols-md-2 row-cols-xl-3">
             {% if sensors|length > 0 %}
                 {% for sensor in sensors %}
-                    <div class="col" >
-                        <h6>{{sensor['desc']}}</h6>
-                        <canvas id="chart_{{sensor['pid']}}" class="Chart" ></canvas>
+                    <div class="col">
+                        <div class="d-flex">
+                            <div>{{sensor['desc']}}</div>
+                            <div class="ms-auto" id="val_{{ sensor['pid'] }}">N/A</div>
+                            <div>&nbsp;{{ sensor['unit'] }}</div>
+                        </div>
+                        <div>
+                            <canvas id="chart_{{sensor['pid']}}" class="Chart" ></canvas>
+                        </div>
                     </div>
                 {% endfor %}
             {% else %}
@@ -44,7 +50,7 @@
         charts[sensor.pid] = CreateChart(
             $('#chart_' + sensor.pid),
             //!! need to adjust range depending on sensor
-            0, 100
+            sensor.min, sensor.max
         )
     }
 
@@ -57,6 +63,8 @@
                 sensor.val,
                 sensor.elapsed
             )
+
+            $('#val_' + sensor.pid).html(sensor.val)
         }
     });
 

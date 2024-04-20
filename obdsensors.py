@@ -3,6 +3,11 @@ from obd import commands as obd_commands
 # Lookup table of PIDs which are used for live data, with their min/max values and units
 # from https://www.csselectronics.com/pages/obd2-pid-table-on-board-diagnostics-j1979
 
+CMD = 0
+MIN = 1
+MAX = 2
+UNIT = 3
+
 pids = {
 	4:  [None,	0,		100,	'%'		],
 	5:  [None,	-40,	215,	'°C'	],

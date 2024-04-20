@@ -5,6 +5,7 @@ from flask_socketio import SocketIO
 from threading import Event, Thread
 from psutil import cpu_percent
 from time import time
+import obdsensors
 
 class CarConnection:
 	def __init__(self, socketio, test=False):
@@ -66,8 +67,12 @@ class CarConnection:
 		self.sensors = [
 			{
 				'pid': f"0x{command.pid:02X}", # format as hexadecimal
+				'pid_int': command.pid,
 				'name': command.name,
-				'desc': command.desc
+				'desc': command.desc,
+				'min': obdsensors.pids[command.pid][obdsensors.MIN],
+				'max': obdsensors.pids[command.pid][obdsensors.MAX],
+				'unit': obdsensors.pids[command.pid][obdsensors.UNIT]
 			}
 			# should check for PIDs that are actually sensors?
 			for command in supported
@@ -81,7 +86,6 @@ class CarConnection:
 	def connect(self):
 		self.action = 'car_connect'
 		self.ev.set()
-
 
 	def disconnect(self):
 		self.action = 'car_disconnect'
@@ -162,7 +166,7 @@ class DataLogger:
 					data = []
 					# ---- test
 					for sensor in self.sensors:
-						r = self.connection.obd.query(obd_commands[1][sensor['pid']])
+						r = self.connection.obd.query(obd_commands[1][sensor['pid_int']])
 						print('%20s: %s' % (sensor['name'], str(r.value)))
 						data.append({
 							'pid': sensor['pid'],
