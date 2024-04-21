@@ -21,7 +21,7 @@ socketio = SocketIO(app, logger=app.logger, engineio_logger=app.logger, async_mo
 # CarConnection monitors the OBD connection, and DataLogger reads data from the car
 # These are background tasks because they would freeze the web server
 # the threads are controlled via the classes
-obd = CarConnection(socketio, test=True)
+obd = CarConnection(socketio, test=False)
 data_logger = DataLogger(obd, socketio)
 
 # logging.getLogger().addHandler(logging.StreamHandler())
@@ -115,9 +115,15 @@ if __name__ == '__main__':
 	wsgi_server = ThreadedWSGIServer(app=app, host=ip, port=5000)
 
 	# create processes as SocketIO background tasks (threads)
+	print('starting server thread', end='...')
 	t_server = socketio.start_background_task(wsgi_server.serve_forever)
+	print("done")
+	print('starting connmon thread', end='...')
 	t_connmon = socketio.start_background_task(obd.thread)
+	print("done")
+	print('starting logger thread', end='...')
 	t_logger = socketio.start_background_task(data_logger.thread)
+	print("done")
 
 	def clean_shutdown():
 		print("closing logger thread", end="...")

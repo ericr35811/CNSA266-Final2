@@ -12,6 +12,7 @@ class CarConnection:
 		self.obd: OBD = None
 
 		self.test = test
+		self.BAUD = 9600
 
 		self.running = False
 		self.ev = Event()
@@ -27,7 +28,7 @@ class CarConnection:
 		self.status = None
 		# waits until connecting is done
 		#self.connection = OBD(baudrate=9600, portstr='COM3', timeout=1)
-		self.obd = OBD()
+		self.obd = OBD(baudrate=self.BAUD)
 		if self.connected():
 			print('CarConnection: Connected to car')
 			self._get_sensors()
@@ -77,7 +78,8 @@ class CarConnection:
 			# should check for PIDs that are actually sensors?
 			for command in supported
 				# only include if the command has a PID and belongs to mode 1 (live data)
-				if command.pid is not None and command.command[:2] == b'01'
+				# if command.pid is not None and command.command[:2] == b'01'
+				if command.pid in obdsensors.pids.keys() and command.command[:2] == b'01'
 		]
 
 		# supported_commands is unordered, so sort the new list by PID
@@ -122,7 +124,7 @@ class CarConnection:
 class DataLogger:
 	def __init__(self, connection: CarConnection, socketio: SocketIO):
 		self.connection = connection
-		self.rate = 0.5 # seconds
+		self.rate = 2 # seconds
 		self.t0 = None
 		self.sensors = None
 
@@ -168,14 +170,22 @@ class DataLogger:
 					for sensor in self.sensors:
 						r = self.connection.obd.query(obd_commands[1][sensor['pid_int']])
 						print('%20s: %s' % (sensor['name'], str(r.value)))
-						data.append({
-							'pid': sensor['pid'],
-							'val': str(r.value),
-							'elapsed': round(time() - self.t0, 2)
-						})
+						if r.value.magnitude is not None:
+							data.append({
+								'pid': sensor['pid'],
+								'val': r.value.magnitude,
+								'elapsed': round(time() - self.t0, 2)
+							})
+						else:
+							print('!!', sensor['name'], 'was None!')
+							data.append({
+								'pid': sensor['pid'],
+								'val': 0,
+								'elapsed': round(time() - self.t0, 2)
+							})
 					# ---------
 
-					# self.socketio.emit('send_data', data)
+					self.socketio.emit('send_data', data)
 					self.socketio.sleep(self.rate)
 				else:
 					print('DataLogger: No sensors to read')
