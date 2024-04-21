@@ -21,7 +21,7 @@ socketio = SocketIO(app, logger=app.logger, engineio_logger=app.logger, async_mo
 # CarConnection monitors the OBD connection, and DataLogger reads data from the car
 # These are background tasks because they would freeze the web server
 # the threads are controlled via the classes
-obd = CarConnection(socketio, test=False)
+obd = CarConnection(socketio, test=True)
 data_logger = DataLogger(obd, socketio)
 
 # logging.getLogger().addHandler(logging.StreamHandler())
@@ -35,7 +35,7 @@ def index():
 def card_selectsensors():
 	return render_template('card/selectsensors.html', sensors=obd.sensors)
 
-
+# todo: when the client clicks "back" from the logging page to the sensor selection page, and then back to the logging page, the client receives a duplicate send_data event for each time they went back. wtf
 @app.route('/forms/selectsensors', methods=['POST'])
 def form_selectsensors():
 	if request.method == 'POST':

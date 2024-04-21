@@ -14,7 +14,7 @@ function CreateChart(ctx, min, max) {
                 //label: label,
                 data: [],
                 borderWidth: 3,
-                pointStyle: false
+                //pointStyle: false
             }]
         },
         options: {

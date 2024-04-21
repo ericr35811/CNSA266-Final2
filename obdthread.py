@@ -12,7 +12,7 @@ class CarConnection:
 		self.obd: OBD = None
 
 		self.test = test
-		self.BAUD = 9600
+		self.BAUD = None
 
 		self.running = False
 		self.ev = Event()
@@ -168,12 +168,13 @@ class DataLogger:
 					data = []
 					# ---- test
 					for sensor in self.sensors:
+						print('querying', sensor['pid_int'], sensor['name'])
 						r = self.connection.obd.query(obd_commands[1][sensor['pid_int']])
 						print('%20s: %s' % (sensor['name'], str(r.value)))
-						if r.value.magnitude is not None:
+						if r.value is not None:
 							data.append({
 								'pid': sensor['pid'],
-								'val': r.value.magnitude,
+								'val': round(r.value.magnitude, 2),
 								'elapsed': round(time() - self.t0, 2)
 							})
 						else:
@@ -183,6 +184,8 @@ class DataLogger:
 								'val': 0,
 								'elapsed': round(time() - self.t0, 2)
 							})
+
+						#self.socketio.sleep(0.25)
 					# ---------
 
 					self.socketio.emit('send_data', data)

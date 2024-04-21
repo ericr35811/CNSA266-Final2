@@ -60,6 +60,7 @@
     // handle event when the server sends new data
     // push the new data onto each chart
     socketio.on('send_data', (data) => {
+        console.log('send_data')
         for (sensor of data) {
             updateChart(
                 charts[sensor.pid],
