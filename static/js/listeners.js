@@ -24,12 +24,14 @@ socketio.on('car_connect_status', (status) => {
 socketio.on('send_data', (data) => {
     console.log('send_data')
     for (sensor of data) {
+        dataLog[sensor.pid].push(sensor);
+
         updateChart(
             charts[sensor.pid],
             sensor.val,
             sensor.elapsed
-        )
+        );
 
-        $('#val_' + sensor.pid).html(sensor.val)
+        $('#val_' + sensor.pid).html(sensor.val);
     }
 });

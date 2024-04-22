@@ -9,7 +9,7 @@
     <div class="card-body">
         {% if sensors|length > 0 %}
 {#        {% if sensors|length == 1 %}#}
-        <div class="justify-content-center row sensorList">
+        <div class="pb-3 justify-content-center row sensorList">
 {#        {% elif sensors|length == 2 %}#}
 {#        <div class="justify-content-center row row-cols-sm-1 row-cols-md-2 sensorList">#}
 {#        {% elif sensors|length == 2 %}#}
@@ -17,7 +17,7 @@
 {#        {% endif %}#}
             {% for sensor in sensors %}
             <div class="col">
-                <div class="d-flex">
+                <div class="d-flex pb-2">
                     <div>{{sensor['desc']}}</div>
                     <div class="ms-auto" id="val_{{ sensor['pid'] }}">N/A</div>
                     <div>&nbsp;{{ sensor['unit'] }}</div>
@@ -48,12 +48,14 @@
 
 <script>
     var charts = {};
+    var dataLog = {};
 
     // get a JSON list of the sensors to read
     var sensors = {{ sensors|tojson }};
 
     // initialize each chart
     for (var sensor of sensors) {
+        dataLog[sensor.pid] = [];
         charts[sensor.pid] =
             CreateChart(
                 $('#chart_' + sensor.pid),
@@ -92,7 +94,12 @@
         // maxPoints = $('#txtLength').val()
         checkTxt('#txtLength', 'int', (val) => {
             //maxPoints = val;
-            resizeCharts(charts, val);
+            for (sensor of sensors) {
+                resizeChart(charts[sensor.pid], val, dataLog[sensor.pid])
+            }
+
+            maxPoints = val;
+            //resizeCharts(charts, val);
         })
     }
 

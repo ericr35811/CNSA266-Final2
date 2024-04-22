@@ -1,5 +1,6 @@
 var socketio = io();
 var maxPoints = 20;
+var dataLog = [];
 
 // function to initialize a Chart.js chart, taking an HTML canvas as input
 function CreateChart(ctx, min, max) {
@@ -48,7 +49,7 @@ function CreateChart(ctx, min, max) {
 function clearCharts(charts) {
     for (i in charts) {
         charts[i].data.labels = Array.from(Array(maxPoints), () => "");
-        charts[i].data.datasets[0].data = Array.from(Array(maxPoints), () => 0);
+        charts[i].data.datasets[0].data = Array.from(Array(maxPoints), () => '');
         charts[i].update('none');
     }
 }
@@ -67,25 +68,73 @@ function resizeCharts(charts, length) {
     maxPoints = length;
 }
 
+// todo: make blank chart data not zero
+function resizeChart(chart, length, data) {
+    console.log(data);
+    console.log(data.map(x => x.elapsed).slice(data.length - length, data.length));
+
+    chart.data.labels = data.map(x => x.elapsed).slice(data.length - length, data.length);
+    chart.data.datasets[0].data = data.map(x => x.val).slice(data.length - length, data.length);
+
+    if (chart.data.labels.length < length) {
+        chart.data.labels = Array(length - chart.data.labels.length).fill('').concat(chart.data.labels);
+    }
+    if (chart.data.datasets[0].data.length < length) {
+        chart.data.datasets[0].data = Array(length - chart.data.datasets[0].data.length).fill('').concat(chart.data.datasets[0].data);
+    }
+
+    chart.update('none');
+}
+
+
 function constrainChart(chart, length) {
      // limit chart length
-    chart.data.labels = chart.data.labels.slice(0, length);
-    chart.data.datasets[0].data = chart.data.datasets[0].data.slice(0, length);
+    //chart.data.labels = chart.data.labels.slice(0, length);
+    //chart.data.datasets[0].data = chart.data.datasets[0].data.slice(0, length);
+
+    chart.data.labels = chart.data.labels.slice(
+        chart.data.labels.length - length,
+        length
+    );
+    chart.data.datasets[0].data = chart.data.datasets[0].data.slice(
+        chart.data.datasets[0].data.length - length,
+        length
+    );
 }
 
 // push new values onto a Chart.js chart
-function updateChart(chart, val, time) {
+function updateChart(chart, val, time, limit) {
     // add new data to chart
-    chart.data.labels.unshift(time);
-    chart.data.datasets[0].data.unshift(val);
+    //chart.data.labels.unshift(time);
+    //chart.data.datasets[0].data.unshift(val);
 
-    constrainChart(chart, maxPoints);
+    if (chart.data.labels.length < limit) {
+        chart.data.labels.pop();
+        chart.data.labels.unshift(time);
+        chart.data.datasets[0].data.pop();
+        chart.data.datasets[0].data.unshift(val);
+    }
+    else {
+        chart.data.labels.shift();
+        chart.data.labels.push(time);
+        chart.data.datasets[0].data.shift();
+        chart.data.datasets[0].data.push(val);
+    }
 
     // update the canvas with no animation
     chart.update('none');
 }
 
+function newData(charts, dataLog, data) {
+    dataLog.push(data);
+    updateChart(
+        charts[data.pid],
+        data.val,
+        data.elapsed
+    );
 
+    $('#val_' + sensor.pid).html(sensor.val);
+}
 
 // load a new card onto the page
 function navCard(path) {
