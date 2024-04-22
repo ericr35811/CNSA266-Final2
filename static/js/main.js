@@ -1,5 +1,4 @@
 var socketio = io();
-var sock;
 var maxPoints = 20;
 
 // function to initialize a Chart.js chart, taking an HTML canvas as input
@@ -51,9 +50,21 @@ function CreateChart(ctx, min, max) {
 
 // function to zero out a Chart.js chart
 function clearChart(chart) {
-    chart.data.labels = Array.from(Array(maxPoints), () => "");
-    chart.data.datasets[0].data = Array.from(Array(maxPoints), () => 0);
+    chart.data.labels =             Array.from(Array(maxPoints), () => "");
+    chart.data.datasets[0].data =   Array.from(Array(maxPoints), () => 0);
     chart.update('none');
+}
+
+// todo: why no work!!!!!!!!!!!
+function resizeCharts(charts, length) {
+    if (length > maxPoints) {
+        for (chart of charts) {
+            chart.data.labels = chart.data.labels.concat(                       Array.from(Array(length - maxPoints), () => ""));
+            chart.data.datasets[0].data = chart.data.datasets[0].data.concat(   Array.from(Array(length - maxPoints), () => 0));
+        }
+    }
+
+    maxPoints = length;
 }
 
 // load a new card onto the page
@@ -63,10 +74,6 @@ function navCard(path) {
 
 // text box validation function
 function checkTxt(ctlId, type, cb_success, cb_fail) {
-    //if (!cb_success) cb_success = (num) => {console.log(ctlId + ': ' + num)}
-    // default function to execute if validation fails
-    if (!cb_fail) cb_fail = () => {console.log(ctlId + ': must be an int')}
-
     // get the value from the txtInterval control
     var num = $(ctlId).val();
 
@@ -83,7 +90,10 @@ function checkTxt(ctlId, type, cb_success, cb_fail) {
         console.log(ctlId + ': ' + num);
         cb_success(num);
     }
-    else cb_fail();
+    else {
+        console.log(ctlId + ': must be an int');
+        cb_fail();
+    }
 }
 
 // push new values onto a Chart.js chart
@@ -106,3 +116,5 @@ function updateChart(chart, val, time) {
     // update the canvas with no animation
     chart.update('none');
 }
+
+

@@ -14,8 +14,9 @@
     <meta name="viewport" id="viewport_device">
 </head>
 
-<body onload="navCard('/static/card/start.html')">
+<body>
     <script src="/static/js/main.js"></script>
+    <script src="/static/js/listeners.js"></script>
 
     <div class="container-fluid d-flex bg-light p-3 mb-3">
         <div class="me-3"><a href="/">OBD Viewer</a></div>
@@ -34,29 +35,6 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 
     <script>
-        socketio.on('connect', (socket) => {
-            console.log('socketio server connected')
-            $('#rPiConnection').html('🟢')
-
-            sock = socket;
-        });
-
-        socketio.on('disconnect', () => {
-            console.log('socketio server disconnected')
-            $('#rPiConnection').html('🔴')
-        })
-
-        socketio.on('car_connect_status', (status) => {
-            if (status === true) {
-                $('#carConnectStatus').html('🟢')
-            }
-            else {
-                $('#carConnectStatus').html('🔴')
-            }
-
-            return true;
-        })
-
         function btnConnect() {
             $('#carConnectStatus').html('🟡');
 
@@ -66,5 +44,8 @@
         function btnDisconnect() {
             socketio.emit('car_disconnect')
         }
+
+        // load the initial card
+        navCard('/static/card/start.html');
     </script>
 </body>

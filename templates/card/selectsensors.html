@@ -1,25 +1,3 @@
-<script>
-    $(document).ready(function() {
-        // submit form and get the next card
-        $('#frmSelectSensors').submit(function(event) {
-            event.preventDefault();
-            $.post({
-                url: '/forms/selectsensors',
-                data: $('#frmSelectSensors').serialize(),
-                success: function(data) {
-                    $('#Content').html(data)
-                }
-            })
-        })
-
-        // select all
-        $('#chkSelectAll').click(function (event) {
-            $('input[name="chkSensors"]').prop('checked', this.checked)
-        })
-
-    })
-</script>
-
 <div class="card mx-auto">
     <div class="card-header">
         Select Sensors
@@ -65,8 +43,29 @@
             <div class="d-flex">
                 <input class='btn btn-primary me-2' type="submit" id="btnStart" value="Start"/>
                 <input class='btn btn-primary me-2' type="button" id="btnRetry" onclick='navCard("/templates/card/selectsensors.html")' value="Try again"/>
-                <input class='btn btn-primary ms-auto' type="button" id="btnBack" value="Back" onclick="navCard('/static/card/start.html')" class="ms-auto"/>
+                <input class='btn btn-primary ms-auto' type="button" id="btnBack" value="Back" onclick="navCard('/static/card/start.html')"/>
             </div>
         </form>
     </div>
 </div>
+
+<script>
+//    $(document).ready(function() {
+        // submit form and get the next card
+        $('#frmSelectSensors').submit(function(event) {
+            event.preventDefault();
+            $.post({
+                url: '/forms/selectsensors',
+                data: $('#frmSelectSensors').serialize(),
+                success: function(data) {
+                    $('#Content').html(data)
+                }
+            })
+        })
+
+        // select all
+        $('#chkSelectAll').click(function (event) {
+            $('input[name="chkSensors"]').prop('checked', this.checked)
+        })
+//    })
+</script>

@@ -7,22 +7,28 @@
         </div>
     </div>
     <div class="card-body">
-        <div class="justify-content-center row row-cols-sm-1 row-cols-md-2 row-cols-xl-3 sensorList">
-            {% if sensors|length > 0 %}
-                {% for sensor in sensors %}
-                    <div class="col">
-                        <div class="d-flex">
-                            <div>{{sensor['desc']}}</div>
-                            <div class="ms-auto" id="val_{{ sensor['pid'] }}">N/A</div>
-                            <div>&nbsp;{{ sensor['unit'] }}</div>
-                        </div>
-                        <canvas id="chart_{{sensor['pid']}}" class="Chart" ></canvas>
-                    </div>
-                {% endfor %}
-            {% else %}
-                <p>No sensors could be loaded. Check the vehicle connection and try again.</p>
-            {% endif %}
+        {% if sensors|length > 0 %}
+{#        {% if sensors|length == 1 %}#}
+        <div class="justify-content-center row sensorList">
+{#        {% elif sensors|length == 2 %}#}
+{#        <div class="justify-content-center row row-cols-sm-1 row-cols-md-2 sensorList">#}
+{#        {% elif sensors|length == 2 %}#}
+{#        <div class="justify-content-center row row-cols-sm-1 row-cols-md-2 row-cols-xl-3 sensorList">#}
+{#        {% endif %}#}
+            {% for sensor in sensors %}
+            <div class="col">
+                <div class="d-flex">
+                    <div>{{sensor['desc']}}</div>
+                    <div class="ms-auto" id="val_{{ sensor['pid'] }}">N/A</div>
+                    <div>&nbsp;{{ sensor['unit'] }}</div>
+                </div>
+                <canvas id="chart_{{sensor['pid']}}" class="Chart" ></canvas>
+            </div>
+            {% endfor %}
         </div>
+        {% else %}
+        <p>No sensors could be loaded. Check the vehicle connection and try again.</p>
+        {% endif %}
 
         <div class="d-flex">
             <input class='btn btn-primary me-2' type="button" id="btnStart" onclick="btnStart()" value="Start"/>
@@ -42,8 +48,6 @@
 
 <script>
     var charts = [];
-    var maxPoints = 20;
-    var wasRunning = false;
 
     // get a JSON list of the sensors to read
     var sensors = {{ sensors|tojson }};
@@ -56,21 +60,6 @@
             sensor.min, sensor.max
         )
     }
-
-    // handle event when the server sends new data
-    // push the new data onto each chart
-    socketio.on('send_data', (data) => {
-        console.log('send_data')
-        for (sensor of data) {
-            updateChart(
-                charts[sensor.pid],
-                sensor.val,
-                sensor.elapsed
-            )
-
-            $('#val_' + sensor.pid).html(sensor.val)
-        }
-    });
 
     function btnStart() {
         socketio.emit('log_start')
@@ -100,19 +89,35 @@
     function txtLength() {
         // maxPoints = $('#txtLength').val()
         checkTxt('#txtLength', 'int', (val) => {
-            maxPoints = val;
+            //maxPoints = val;
+            resizeCharts(charts, val);
         })
+    }
+
+    var sensorList = $('.sensorList');
+
+    $('#chkGraphs').click(function(event){
+        // hide the graphs
+        $('.Chart').prop('hidden', !this.checked);
+        // append/remove the row-cols-1 class, which limits the display without the graphs to 1 column on small devices
+        // weird stuff happens otherwise
+        sensorList.toggleClass('row-cols-1');
+    })
+
+    // change the number of columns for graphs depending on number of sensors
+    // e.g., if there is only one sensor, don't allow the 2 or 3 column layouts, so the graph is as large as possible
+    if (sensors.length >= 1) {
+        sensorList.addClass('row-cols-sm-1');
+    }
+    if (sensors.length >= 2) {
+        sensorList.addClass('row-cols-md-2');
+    }
+    if (sensors.length >= 3) {
+        sensorList.addClass('row-cols-xl-3');
     }
 
     txtLength(); // read default values from the page
     txtRate();
-
-    $('#chkGraphs').click(function(event){
-        // hide the graphs
-        $('canvas').prop('hidden', !this.checked);
-        // append/remove the row-cols-1 class, which limits the display to 1 column on small devices without the graphs
-        $('.sensorList').toggleClass('row-cols-1');
-    })
 
 
 </script>

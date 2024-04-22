@@ -15,7 +15,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'RAAAH SECRET'
 
 # create the SocketIO app based on the Flask app
-socketio = SocketIO(app, logger=app.logger, engineio_logger=app.logger, async_mode='threading')
+socketio = SocketIO(app, async_mode='threading',logger=app.logger)
 
 # instantiate classes for background tasks
 # CarConnection monitors the OBD connection, and DataLogger reads data from the car
@@ -35,7 +35,7 @@ def index():
 def card_selectsensors():
 	return render_template('card/selectsensors.html', sensors=obd.sensors)
 
-# todo: when the client clicks "back" from the logging page to the sensor selection page, and then back to the logging page, the client receives a duplicate send_data event for each time they went back. wtf
+
 @app.route('/forms/selectsensors', methods=['POST'])
 def form_selectsensors():
 	if request.method == 'POST':
