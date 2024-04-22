@@ -13,7 +13,7 @@ function CreateChart(ctx, min, max) {
                 //label: label,
                 data: [],
                 borderWidth: 3,
-                //pointStyle: false
+                pointStyle: false
             }]
         },
         options: {
@@ -41,31 +41,51 @@ function CreateChart(ctx, min, max) {
 
         maxPoints: length
     });
-
-    // fill the datasets on creation
-    clearChart(chart);
-
     return chart;
 }
 
 // function to zero out a Chart.js chart
-function clearChart(chart) {
-    chart.data.labels =             Array.from(Array(maxPoints), () => "");
-    chart.data.datasets[0].data =   Array.from(Array(maxPoints), () => 0);
-    chart.update('none');
+function clearCharts(charts) {
+    for (i in charts) {
+        charts[i].data.labels = Array.from(Array(maxPoints), () => "");
+        charts[i].data.datasets[0].data = Array.from(Array(maxPoints), () => 0);
+        charts[i].update('none');
+    }
 }
 
-// todo: why no work!!!!!!!!!!!
 function resizeCharts(charts, length) {
-    if (length > maxPoints) {
-        for (chart of charts) {
-            chart.data.labels = chart.data.labels.concat(                       Array.from(Array(length - maxPoints), () => ""));
-            chart.data.datasets[0].data = chart.data.datasets[0].data.concat(   Array.from(Array(length - maxPoints), () => 0));
+    for (i in charts) {
+        if (length > maxPoints) {
+            charts[i].data.labels = charts[i].data.labels.concat(                       Array.from(Array(length - maxPoints), () => ""));
+            charts[i].data.datasets[0].data = charts[i].data.datasets[0].data.concat(   Array.from(Array(length - maxPoints), () => 0));
         }
+
+        constrainChart(charts[i], length);
+        charts[i].update('none');
     }
 
     maxPoints = length;
 }
+
+function constrainChart(chart, length) {
+     // limit chart length
+    chart.data.labels = chart.data.labels.slice(0, length);
+    chart.data.datasets[0].data = chart.data.datasets[0].data.slice(0, length);
+}
+
+// push new values onto a Chart.js chart
+function updateChart(chart, val, time) {
+    // add new data to chart
+    chart.data.labels.unshift(time);
+    chart.data.datasets[0].data.unshift(val);
+
+    constrainChart(chart, maxPoints);
+
+    // update the canvas with no animation
+    chart.update('none');
+}
+
+
 
 // load a new card onto the page
 function navCard(path) {
@@ -94,27 +114,6 @@ function checkTxt(ctlId, type, cb_success, cb_fail) {
         console.log(ctlId + ': must be an int');
         cb_fail();
     }
-}
-
-// push new values onto a Chart.js chart
-function updateChart(chart, val, time) {
-    // get linechart axes
-    var xAxis = chart.data.labels;
-    var yAxis = chart.data.datasets[0].data;
-
-    // add new data to chart
-    xAxis.unshift(time);
-    yAxis.unshift(val);
-
-    // limit chart length
-    if (xAxis.length >= maxPoints)
-        chart.data.labels = xAxis.slice(0, maxPoints);
-
-    if (xAxis.length >= maxPoints)
-        chart.data.datasets[0].data = yAxis.slice(0, maxPoints);
-
-    // update the canvas with no animation
-    chart.update('none');
 }
 
 

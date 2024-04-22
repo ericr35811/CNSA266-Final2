@@ -47,18 +47,22 @@
 </div>
 
 <script>
-    var charts = [];
+    var charts = {};
 
     // get a JSON list of the sensors to read
     var sensors = {{ sensors|tojson }};
 
     // initialize each chart
     for (var sensor of sensors) {
-        charts[sensor.pid] = CreateChart(
-            $('#chart_' + sensor.pid),
-            //!! need to adjust range depending on sensor
-            sensor.min, sensor.max
-        )
+        charts[sensor.pid] =
+            CreateChart(
+                $('#chart_' + sensor.pid),
+                //!! need to adjust range depending on sensor
+                sensor.min, sensor.max
+            )
+        ;
+
+        clearCharts(charts);
     }
 
     function btnStart() {
@@ -72,9 +76,7 @@
     }
 
     function btnClear() {
-        for (var i in charts) {
-            clearChart(charts[i]);
-        }
+        clearCharts(charts);
     }
 
     // validate the logging rate text box and send an event if it succeeds
