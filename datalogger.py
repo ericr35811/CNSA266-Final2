@@ -1,9 +1,13 @@
 from queue import Queue
 from time import time
+from datetime import datetime
 from flask_socketio import SocketIO
 from psutil import cpu_percent
+
+import obdsensors
 from obd import commands as obd_commands
 from carconnection import CarConnection
+import csv
 
 
 class DataLogger:
@@ -15,6 +19,11 @@ class DataLogger:
 		self.rate = 2 # seconds
 		self.t0 = None
 		self.running = False
+
+		self.LOG_DIR = 'logs/'
+		self.LOG_FORMAT = 'log_%Y%m%d-%H%M%S.csv'
+		self.log_file = None
+		self.csv = None
 
 		# list of sensors to monitor
 		self.sensors = None
@@ -34,16 +43,25 @@ class DataLogger:
 		if self.connection.test:
 			if self.sensors is not None:
 				cpu = cpu_percent(percpu=True)
-				data = [
-					{
+				data = []
+				elapsed = round(time() - self.t0, 2)
+				# ---- test
+				for i, sensor in enumerate(self.sensors):
+					data.append({
 						'pid': sensor['pid'],
 						'val': round(cpu[i], 2),
-						'elapsed': round(time() - self.t0, 2)
-					}
-					for i, sensor in enumerate(self.sensors)
-				]
+						'elapsed': elapsed
+					})
+
+				# self.socketio.sleep(0.25)
+				# ---------
 
 				self.socketio.emit('send_data', data)
+
+				self.csv.writerow([elapsed] + [
+					sensor['val'] for sensor in data
+				])
+
 				self.socketio.sleep(self.rate)
 			else:
 				print('DataLogger: No sensors to read')
@@ -88,6 +106,16 @@ class DataLogger:
 
 	def _start(self):
 		if not self.running:
+			# open a new log file
+			self.log_file = open(self.LOG_DIR + datetime.now().strftime(self.LOG_FORMAT), 'w', newline='')
+			self.csv = csv.writer(self.log_file)
+
+			# write the header line (time, pid1, pid2, pid3, etc.
+			self.csv.writerow(['time'] + [
+				# sets the sensor name and units as the column name
+				f'{s["name"]} ({obdsensors.pids[s["pid_int"]][obdsensors.UNIT]})' for s in self.sensors
+			])
+
 			self.running = True
 			self.t0 = time()
 			self._log()
@@ -98,6 +126,8 @@ class DataLogger:
 
 	def _stop(self):
 		if self.running:
+			self.log_file.close()
+
 			self.running = False
 		else:
 			print('DataLogger._stop: already stopped')
