@@ -48,26 +48,25 @@ function CreateChart(ctx, min, max) {
 // function to zero out a Chart.js chart
 function clearCharts(charts) {
     for (i in charts) {
-        charts[i].data.labels = Array(maxPoints).fill('');
-        charts[i].data.datasets[0].data = Array(maxPoints).fill(null);
+        charts[i].data.labels.fill('');
+        charts[i].data.datasets[0].data.fill(null);
         charts[i].update('none');
     }
 }
 
-
-function resizeChart(chart, length, data) {
+// adjust the length of a chart
+function resizeChart(chart, length, dataLog) {
     var ndata;
 
     // pad the list out to [length] if there are not at least [length] items in data
-    if (data.length <= length)
-        ndata = data.concat(
-            Array(length - data.length)
+    if (dataLog.length <= length)
+        ndata = dataLog.concat(
+            Array(length - dataLog.length)
             .fill({val: null, elapsed: ''})
         );
     // otherwise get the most recent [length] items from the end of the data list
     else
-        ndata = data.slice(data.length - length, data.length);
-
+        ndata = dataLog.slice(dataLog.length - length, dataLog.length);
 
     // set the values for each axis from the data
     chart.data.labels = ndata.map(x => x.elapsed);
@@ -77,28 +76,23 @@ function resizeChart(chart, length, data) {
 }
 
 // push new values onto a Chart.js chart
-function updateChart(chart, val, time, side) {
-    // add new data to chart
-    //chart.data.labels.unshift(time);
-    //chart.data.datasets[0].data.unshift(val);
-
+function updateChart(chart, val, time) {
+    // get references to chart axes
     var x = chart.data.labels;
     var y = chart.data.datasets[0].data;
 
+    // look for the first (leftmost) null value in the chart (a blank data point)
+    // if it is found, replace that null with the new value
     i = y.indexOf(null);
     if (i > -1) {
         x[i] = time;
         y[i] = val;
-
-        // chart.data.labels.pop();
-        // chart.data.labels.unshift(time);
-        // chart.data.datasets[0].data.pop();
-        // chart.data.datasets[0].data.unshift(val);
     }
+    // if there are no blank data points, add the new values and scroll the graph to the left
     else {
         x.shift();
-        x.push(time);
         y.shift();
+        x.push(time);
         y.push(val);
     }
 
@@ -130,7 +124,7 @@ function checkTxt(ctlId, type, cb_success, cb_fail) {
         cb_success(num);
     }
     else {
-        console.log(ctlId + ': must be an int');
+        console.log(ctlId + ': invalid');
         cb_fail();
     }
 }

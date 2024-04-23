@@ -75,10 +75,8 @@ class CarConnection:
 				'max': obdsensors.pids[command.pid][obdsensors.MAX],
 				'unit': obdsensors.pids[command.pid][obdsensors.UNIT]
 			}
-			# should check for PIDs that are actually sensors?
 			for command in supported
-				# only include if the command has a PID and belongs to mode 1 (live data)
-				# if command.pid is not None and command.command[:2] == b'01'
+				# only include if the command has a live data PID and belongs to mode 1 (live data)
 				if command.pid in obdsensors.pids.keys() and command.command[:2] == b'01'
 		]
 
@@ -163,7 +161,7 @@ class DataLogger:
 				print('DataLogger: No sensors to read')
 
 		else:
-			if self.connection.connected() or self.connection.test:
+			if self.connection.connected():
 				if self.sensors is not None:
 					data = []
 					# ---- test
@@ -181,7 +179,7 @@ class DataLogger:
 							print('!!', sensor['name'], 'was None!')
 							data.append({
 								'pid': sensor['pid'],
-								'val': 0,
+								'val': None,
 								'elapsed': round(time() - self.t0, 2)
 							})
 
