@@ -1,7 +1,8 @@
 from flask import Flask, render_template, request, session, Response, redirect, jsonify
 from socket import gethostname
 from flask_socketio import SocketIO, emit
-from obdthread import DataLogger, CarConnection
+from carconnection import CarConnection
+from datalogger import DataLogger
 from atexit import register as atexit_register
 from signal import signal, SIGINT
 from werkzeug.serving import BaseWSGIServer, ThreadedWSGIServer
