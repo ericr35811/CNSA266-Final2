@@ -43,7 +43,8 @@ def form_selectsensors():
 		selected = request.form.getlist('chkSensors')
 		# get sensors info by PID
 		sensors = [s for s in obd.sensors if s['pid'] in selected]
-		data_logger.set_sensors(sensors)
+		# data_logger.set_sensors(sensors)
+		data_logger.sensors = sensors
 
 		return render_template('card/logging.html', sensors=sensors)
 

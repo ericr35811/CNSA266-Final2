@@ -3,58 +3,87 @@ from obd import OBD, OBDCommand, OBDStatus, OBDResponse, commands as obd_command
 
 from flask_socketio import SocketIO
 from threading import Event, Thread
+from queue import Queue
 from psutil import cpu_percent
 from time import time
 import obdsensors
 
 class CarConnection:
 	def __init__(self, socketio, test=False):
+		# OBD connection object
 		self.obd: OBD = None
 
+		# misc connection options
 		self.test = test
 		self.BAUD = None
+		self.PORT = None
 
-		self.running = False
-		self.ev = Event()
-		self.action = ''
-
-		self.socketio = socketio
-
+		# options
 		self.rate = 0.5
-		self.status = None
+
+		# connection status
+		# only for _check_status()
+		self.status = False
+
+		# list of supported sensors
 		self.sensors = []
 
-	def _connect(self):
-		self.status = None
-		# waits until connecting is done
-		#self.connection = OBD(baudrate=9600, portstr='COM3', timeout=1)
-		self.obd = OBD(baudrate=self.BAUD)
-		if self.connected():
-			print('CarConnection: Connected to car')
-			self._get_sensors()
-		else:
-			print('CarConnection: Not connected:', self.obd.status())
-			if self.test:
-				self._get_sensors()
+		# task queue
+		self.q = Queue()
+		self.tasks = []
+		# flags to prevent loads of duplicate events on the queue
+		self._f_connect = False
+		self._f_disconnect = False
 
+		# SocketIO connection for sending events
+		self.socketio = socketio
+
+	# check if OBD is connected
+	def connected(self):
+		return self.obd is not None and self.obd.status() == OBDStatus.CAR_CONNECTED
+
+	# create the OBD connection
+	def _connect(self):
+		if not self.connected():
+			# waits until connecting is done
+			self.obd = OBD(baudrate=self.BAUD, portstr=self.PORT)
+			if self.connected():
+				print('CarConnection: Connected to car')
+				self._get_sensors()
+				self._check_status(force=True)
+			else:
+				print('CarConnection: Not connected:', self.obd.status())
+				if self.test:
+					self._get_sensors()
+					self._check_status(force=True)
+		else:
+			print('CarConnection: Already connected')
+
+		self._f_connect = False
+
+	# close the OBD connection
 	def _disconnect(self):
 		if self.obd is not None:
 			self.obd.close()
 
-	def _check_status(self):
+		self._f_disconnect = False
+		self.q.put(self._check_status)
+
+	# check whether the connection status has changed, and send an event to the client if it has
+	def _check_status(self, force=False):
 		s = self.connected()
-		# send an event if the state of the connection has changed
-		if s != self.status:
+
+		if s != self.status or force:
 			self.status = s
 			# wait for browser to acknowledge the event
 			self.socketio.emit('car_connect_status', s)
 
 		self.socketio.sleep(self.rate)
 
-	def connected(self):
-		return self.obd is not None and self.obd.status() == OBDStatus.CAR_CONNECTED
+		# prepare to run this again
+		self.q.put(self._check_status)
 
-	# does not need to be threaded, none of this should block
+	# prepare the list of supported sensors and information about each one
 	def _get_sensors(self):
 		supported = self.obd.supported_commands
 
@@ -83,64 +112,55 @@ class CarConnection:
 		# supported_commands is unordered, so sort the new list by PID
 		self.sensors.sort(key=lambda x: x['pid'])
 
+	# ----- task creators ------
 	def connect(self):
-		self.action = 'car_connect'
-		self.ev.set()
+		if not self._f_connect:
+			self._f_connect = True
+			self.q.put(self._connect)
 
 	def disconnect(self):
-		self.action = 'car_disconnect'
-		self.ev.set()
-
-	def thread(self):
-		while True:
-			if self.ev.is_set():
-				if self.action == 'car_connect':
-					print('CarConnection: car_connect')
-					self.ev.clear()
-					self.action = ''
-					self._connect()
-
-				elif self.action == 'car_disconnect':
-					print('CarConnection: car_disconnect')
-					self.ev.clear()
-					self.action = ''
-					self._disconnect()
-
-				elif self.action == 'exit':
-					self.ev.clear()
-					break
-			else:
-				self.action = 'monitor'
-				self._check_status()
+		if not self._f_disconnect:
+			self._f_disconnect = True
+			self.q.put(self._disconnect)
 
 	def exit(self):
 		self.disconnect()
-		self.action = 'exit'
-		self.ev.set()
+		self.q.put(None)
+
+	# main loop
+	def thread(self):
+		while True:
+			# wait for a task on the queue
+			task = self.q.get()
+			if task is None:
+				break
+			else:
+				task()
 
 
 class DataLogger:
 	def __init__(self, connection: CarConnection, socketio: SocketIO):
+		# handle for the OBD connection
 		self.connection = connection
+
+		# logging options
 		self.rate = 2 # seconds
 		self.t0 = None
+		self.running = False
+
+		# list of sensors to monitor
 		self.sensors = None
 
-		self.running = False
-		self.ev = Event()
-		self.action = ''
+		# task queue
+		self.q = Queue()
+		self._f_start = False
+		self._f_stop = False
 
+		# handle for SocketIO to send events
 		self.socketio = socketio
 
-	def start(self):
-		self.action = 'start'
-		self.ev.set()
-
-	def stop(self):
-		self.running = False
-
-	def set_sensors(self, sensors):
-		self.sensors = sensors
+	# def set_sensors(self, sensors):
+	# 	self.sensors = sensors
 
 	def _log(self):
 		if self.connection.test:
@@ -194,24 +214,53 @@ class DataLogger:
 				print('DataLogger: OBD not connected')
 				self.stop()
 
-	def thread(self):
-		while True:
-			self.ev.wait()
+		# prepare to run this again if running is true
+		if self.running:
+			self.q.put(self._log)
 
-			if self.action == 'exit':
-				self.ev.clear()
-				break
+	def _start(self):
+		if not self.running:
+			self.running = True
+			self.t0 = time()
+			self._log()
+		else:
+			print('DataLogger._start: already running')
 
-			elif self.action == 'start':
-				self.ev.clear()
+		self._f_start = False
 
-				self.running = True
-				self.t0 = time()
-				while self.running:
-					self._log()
+	def _stop(self):
+		if self.running:
+			self.running = False
+		else:
+			print('DataLogger._stop: already stopped')
+
+		self._f_stop = False
+
+	def start(self):
+		if not self._f_start:
+			self._f_start = True
+			self.q.put(self._start)
+
+	def stop(self):
+		if not self._f_stop:
+			self._f_stop = True
+			self.q.put(self._stop)
 
 	def exit(self):
 		self.stop()
-		self.action = 'exit'
-		self.ev.set()
+		self.q.put(None)
+
+	def thread(self):
+		while True:
+			task = self.q.get()
+
+			# print('*', task.__name__)
+			# for x in self.q.queue:
+			# 	print(x.__name__)
+
+			if task is None:
+				break
+			else:
+				task()
+
 
