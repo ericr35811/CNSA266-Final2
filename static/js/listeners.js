@@ -24,13 +24,15 @@ socketio.on('car_connect_status', (status) => {
 socketio.on('send_data', (data) => {
     console.log('send_data')
     for (sensor of data) {
+        if (dataLog.length > maxData) {
+            // discard old data if history limit is reached
+            // all history is still logged on the server side
+            dataLog[sensor.pid].shift();
+        }
+
         dataLog[sensor.pid].push(sensor);
 
-        updateChart(
-            charts[sensor.pid],
-            sensor.val,
-            sensor.elapsed
-        );
+        updateChart(charts[sensor.pid], sensor.val, sensor.elapsed);
 
         $('#val_' + sensor.pid).html(sensor.val);
     }

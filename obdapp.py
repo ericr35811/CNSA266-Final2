@@ -15,7 +15,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'RAAAH SECRET'
 
 # create the SocketIO app based on the Flask app
-socketio = SocketIO(app, async_mode='threading',logger=app.logger)
+socketio = SocketIO(app, async_mode='threading',logger=app.logger, engineio_logger=app.logger)
 
 # instantiate classes for background tasks
 # CarConnection monitors the OBD connection, and DataLogger reads data from the car

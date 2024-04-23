@@ -63,8 +63,6 @@
                 sensor.min, sensor.max
             )
         ;
-
-        clearCharts(charts);
     }
 
     function btnStart() {
@@ -93,7 +91,15 @@
     function txtLength() {
         // maxPoints = $('#txtLength').val()
         checkTxt('#txtLength', 'int', (val) => {
-            //maxPoints = val;
+            // limit the value
+            if (val > maxData) {
+                val = maxData;
+            }
+
+            // overwrite the value entered
+            // for example, if they enter "40.5", it gets truncated to "40" by parseInt()
+            $('#txtLength').val(val);
+
             for (sensor of sensors) {
                 resizeChart(charts[sensor.pid], val, dataLog[sensor.pid])
             }
@@ -127,6 +133,7 @@
 
     txtLength(); // read default values from the page
     txtRate();
+    clearCharts(charts);
 
 
 </script>
