@@ -37,3 +37,8 @@ socketio.on('send_data', (data) => {
         $('#val_' + sensor.pid).html(sensor.val);
     }
 });
+
+socketio.on('new_log', (data) => {
+    $('#aSaveLog').prop('href', data);
+    $('#btnSaveLog').prop('disabled', false)
+})

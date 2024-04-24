@@ -1,4 +1,4 @@
-<div class="card mx-auto">
+<div class="card mx-3 w-100">
     <div class="card-header d-flex">
         <div>Live Data</div>
         <div class="ms-auto">
@@ -7,9 +7,26 @@
         </div>
     </div>
     <div class="card-body">
+        <div class="d-flex pb-3">
+            <input class='btn btn-primary me-2' type="button" id="btnStart" onclick="btnStart()" value="Start"/>
+            <input class='btn btn-primary me-2' type="button" id="btnStop" onclick="btnStop()" value="Stop">
+            <input class='btn btn-primary me-2' type="button" id="btnClear" onclick="btnClear()" value="Clear">
+
+            <label for="txtRate" class="me-2">Polling rate</label>
+            <input class='me-2' type="text" id="txtRate" onchange="txtRate()" value="0.5" style="width: 3rem">
+
+            <label for="txtLength" class="me-2">Chart length</label>
+            <input class="me-auto" type="text" id="txtLength" onchange="txtLength()" value="50" style="width: 3rem">
+
+            <a id='aSaveLog'>
+                <input class="btn btn-primary me-2" type="button" id="btnSaveLog" value="Download log" disabled>
+            </a>
+            <input class="btn btn-primary" type="button" id="btnBack" value="Back" onclick="btnStop(); navCard('/templates/card/selectsensors.html')"/>
+        </div>
+
         {% if sensors|length > 0 %}
 {#        {% if sensors|length == 1 %}#}
-        <div class="pb-3 justify-content-center row sensorList">
+        <div class="justify-content-center row sensorList">
 {#        {% elif sensors|length == 2 %}#}
 {#        <div class="justify-content-center row row-cols-sm-1 row-cols-md-2 sensorList">#}
 {#        {% elif sensors|length == 2 %}#}
@@ -30,19 +47,7 @@
         <p>No sensors could be loaded. Check the vehicle connection and try again.</p>
         {% endif %}
 
-        <div class="d-flex">
-            <input class='btn btn-primary me-2' type="button" id="btnStart" onclick="btnStart()" value="Start"/>
-            <input class='btn btn-primary me-2' type="button" id="btnStop" onclick="btnStop()" value="Stop">
-            <input class='btn btn-primary me-2' type="button" id="btnClear" onclick="btnClear()" value="Clear">
 
-            <label for="txtRate" class="me-2">Polling rate</label>
-            <input class='me-2' type="text" id="txtRate" onchange="txtRate()" value="0.5">
-
-            <label for="txtLength" class="me-2">Chart length</label>
-            <input class="me-2" type="text" id="txtLength" onchange="txtLength()" value="50">
-
-            <input class="ms-auto btn btn-primary" type="button" id="btnBack" value="Back" onclick="btnStop(); navCard('/templates/card/selectsensors.html')"/>
-        </div>
     </div>
 </div>
 

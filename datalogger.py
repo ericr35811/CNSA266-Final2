@@ -20,7 +20,7 @@ class DataLogger:
 		self.t0 = None
 		self.running = False
 
-		self.LOG_DIR = 'logs/'
+		self.LOG_DIR = 'static/logs/'
 		self.LOG_FORMAT = 'log_%Y%m%d-%H%M%S.csv'
 		self.log_file = None
 		self.csv = None
@@ -41,7 +41,7 @@ class DataLogger:
 
 	def _log(self):
 		if self.connection.test:
-			if self.sensors is not None:
+			if self.sensors is not None and self.running:
 				cpu = cpu_percent(percpu=True)
 				data = []
 				elapsed = round(time() - self.t0, 2)
@@ -53,28 +53,25 @@ class DataLogger:
 						'elapsed': elapsed
 					})
 
-				# self.socketio.sleep(0.25)
-				# ---------
-
 				self.socketio.emit('send_data', data)
-
-				self.csv.writerow([elapsed] + [
-					sensor['val'] for sensor in data
-				])
-
+				self._write_log(elapsed, data)
 				self.socketio.sleep(self.rate)
 			else:
 				print('DataLogger: No sensors to read')
 
 		else:
 			if self.connection.connected():
-				if self.sensors is not None:
+				if self.sensors is not None and self.running:
 					data = []
 					# ---- test
 					for sensor in self.sensors:
 						print('querying', sensor['pid_int'], sensor['name'])
+
 						r = self.connection.obd.query(obd_commands[1][sensor['pid_int']])
+						elapsed = round(r.time - self.t0, 2)
+
 						print('%20s: %s' % (sensor['name'], str(r.value)))
+
 						if r.value is not None:
 							data.append({
 								'pid': sensor['pid'],
@@ -89,12 +86,10 @@ class DataLogger:
 								'elapsed': round(time() - self.t0, 2)
 							})
 
-						#self.socketio.sleep(0.25)
-					# ---------
-
 					self.socketio.emit('send_data', data)
+					self._write_log(elapsed, data)
 					self.socketio.sleep(self.rate)
-				else:
+				elif self.sensors is None:
 					print('DataLogger: No sensors to read')
 			else:
 				print('DataLogger: OBD not connected')
@@ -104,20 +99,33 @@ class DataLogger:
 		if self.running:
 			self.q.put(self._log)
 
+	def _new_log(self):
+		# open a new log file
+		filename = self.LOG_DIR + datetime.now().strftime(self.LOG_FORMAT)
+		self.log_file = open(filename, 'w', newline='')
+		self.csv = csv.writer(self.log_file)
+
+		self.socketio.emit('new_log', filename)
+
+		# write the header line (time, pid1, pid2, pid3, etc.
+		self.csv.writerow(['TIME'] + [
+			# sets the sensor name and units as the column name
+			f'{s["name"]} ({obdsensors.pids[s["pid_int"]][obdsensors.UNIT]})' for s in self.sensors
+		])
+
+	def _write_log(self, time, data):
+		self.csv.writerow([time] + [
+			sensor['val'] for sensor in data
+		])
+
+	def _close_log(self):
+		self.log_file.close()
+
 	def _start(self):
 		if not self.running:
-			# open a new log file
-			self.log_file = open(self.LOG_DIR + datetime.now().strftime(self.LOG_FORMAT), 'w', newline='')
-			self.csv = csv.writer(self.log_file)
-
-			# write the header line (time, pid1, pid2, pid3, etc.
-			self.csv.writerow(['time'] + [
-				# sets the sensor name and units as the column name
-				f'{s["name"]} ({obdsensors.pids[s["pid_int"]][obdsensors.UNIT]})' for s in self.sensors
-			])
-
-			self.running = True
+			self._new_log()
 			self.t0 = time()
+			self.running = True
 			self._log()
 		else:
 			print('DataLogger._start: already running')
@@ -126,8 +134,7 @@ class DataLogger:
 
 	def _stop(self):
 		if self.running:
-			self.log_file.close()
-
+			self._close_log()
 			self.running = False
 		else:
 			print('DataLogger._stop: already stopped')
