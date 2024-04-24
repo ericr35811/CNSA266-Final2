@@ -1,52 +1,50 @@
 <div class="card mx-auto">
-    <div class="card-header">
-        Select Sensors
-    </div>
-    <div class="card-body">
-        <h4>Select sensors to monitor:</h4>
-
-        <form id="frmSelectSensors" method="post" action="/forms/selectsensors">
-            <div id="sensorList" class="d-block pb-2">
-                {% if sensors|length > 0 %}
-                    <table class="table table-hover">
-                        <thead>
-                            <th><input type="checkbox" id="chkSelectAll"/></th>
-                            <th>PID</th>
-                            <th>Name</th>
-                            <th>Description</th>
-                        </thead>
-                        <tbody>
-                            {% for sensor in sensors %}
-                                <tr>
-                                    <td>
-                                        <input type="checkbox" name="chkSensors" value="{{ sensor['pid'] }}"/>
-                                    </td>
-                                    <td>
-                                        {{ sensor['pid'] }}
-                                    </td>
-                                    <td>
-                                        {{ sensor['name'] }}
-                                    </td>
-                                    <td>
-                                        {{ sensor['desc'] }}
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                {% else %}
-                    <p>No sensors could be loaded. Check the vehicle connection and try again.</p>
-                {% endif %}
-            </div>
-
-
+    <form id="frmSelectSensors" method="post" action="/forms/selectsensors">
+        <div class="card-header">
             <div class="d-flex">
                 <input class='btn btn-primary me-2' type="submit" id="btnStart" value="Start"/>
                 <input class='btn btn-primary me-2' type="button" id="btnRetry" onclick='navCard("/templates/card/selectsensors.html")' value="Try again"/>
+
                 <input class='btn btn-primary ms-auto' type="button" id="btnBack" value="Back" onclick="navCard('/static/card/start.html')"/>
             </div>
-        </form>
-    </div>
+        </div>
+        <div class="card-body">
+            <h4>Select sensors to monitor:</h4>
+
+            <div id="sensorList" class="d-block pb-2">
+                {% if sensors|length > 0 %}
+                <table class="table table-hover">
+                    <thead>
+                        <th><input type="checkbox" id="chkSelectAll"/></th>
+                        <th>PID</th>
+                        <th>Name</th>
+                        <th>Description</th>
+                    </thead>
+                    <tbody>
+                        {% for sensor in sensors %}
+                            <tr>
+                                <td>
+                                    <input type="checkbox" name="chkSensors" value="{{ sensor['pid'] }}"/>
+                                </td>
+                                <td>
+                                    {{ sensor['pid'] }}
+                                </td>
+                                <td>
+                                    {{ sensor['name'] }}
+                                </td>
+                                <td>
+                                    {{ sensor['desc'] }}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <p>No sensors could be loaded. Check the vehicle connection and try again.</p>
+                {% endif %}
+            </div>
+        </div>
+    </form>
 </div>
 
 <script>

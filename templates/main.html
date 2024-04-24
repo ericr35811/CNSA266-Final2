@@ -18,14 +18,16 @@
     <script src="/static/js/main.js"></script>
     <script src="/static/js/listeners.js"></script>
 
-    <div class="container-fluid d-flex bg-light p-3 mb-3">
-        <div class="me-3"><a href="/">OBD Viewer</a></div>
+    <div class="container-fluid d-flex bg-light p-3 mb-3 align-items-center">
         <div class="me-3">
             <input class='btn btn-primary me-2' type="button" id="btnConnect" onclick="btnConnect()" value="Connect to car">
             <input class='btn btn-primary me-2' type="button" id="btnDisconnect" onclick="btnDisconnect()" value="Disconnect">
             <span id="carConnectStatus"></span>
         </div>
-        <div class="ms-auto">
+
+        <div class="mx-auto"><a href="/">OBD Viewer</a></div>
+
+        <div class="ms-3">
             WebSocket Connection: <span id="rPiConnection"></span>
         </div>
     </div>

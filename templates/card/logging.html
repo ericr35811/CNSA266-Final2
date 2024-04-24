@@ -1,28 +1,29 @@
 <div class="card mx-3 w-100">
-    <div class="card-header d-flex">
-        <div>Live Data</div>
-        <div class="ms-auto">
-            <label for="chkGraphs">Graphs</label>
-            <input type="checkbox" id="chkGraphs" checked="true">
-        </div>
-    </div>
-    <div class="card-body">
-        <div class="d-flex pb-3">
+    <div class="card-header d-block">
+        <div class="d-flex align-items-center">
             <input class='btn btn-primary me-2' type="button" id="btnStart" onclick="btnStart()" value="Start"/>
             <input class='btn btn-primary me-2' type="button" id="btnStop" onclick="btnStop()" value="Stop">
             <input class='btn btn-primary me-2' type="button" id="btnClear" onclick="btnClear()" value="Clear">
 
-            <label for="txtRate" class="me-2">Polling rate</label>
+            <label class="me-2" for="txtRate" >Polling delay (s):</label>
             <input class='me-2' type="text" id="txtRate" onchange="txtRate()" value="0.5" style="width: 3rem">
 
-            <label for="txtLength" class="me-2">Chart length</label>
-            <input class="me-auto" type="text" id="txtLength" onchange="txtLength()" value="50" style="width: 3rem">
+            <label class="me-2" for="txtLength" >Chart window (s):</label>
+            <input class="me-2" type="text" id="txtLength" onchange="txtLength()" value="60" style="width: 3rem">
+
+
+            <label class="me-2" for="chkGraphs">Graphs:</label>
+            <input class="me-auto" type="checkbox" id="chkGraphs" checked="true">
 
             <a id='aSaveLog'>
                 <input class="btn btn-primary me-2" type="button" id="btnSaveLog" value="Download log" disabled>
             </a>
+
             <input class="btn btn-primary" type="button" id="btnBack" value="Back" onclick="btnStop(); navCard('/templates/card/selectsensors.html')"/>
         </div>
+    </div>
+    <div class="card-body">
+        <h4>Live Data</h4>
 
         {% if sensors|length > 0 %}
 {#        {% if sensors|length == 1 %}#}
@@ -54,6 +55,7 @@
 <script>
     var charts = {};
     var dataLog = {};
+    var rate;
 
     // get a JSON list of the sensors to read
     var sensors = {{ sensors|tojson }};
@@ -88,22 +90,26 @@
     function txtRate() {
         // socketio.emit('log_rate', $('#txtRate').val())
         checkTxt('#txtRate', 'float', (val) => {
-            socketio.emit('log_rate', val)
+            socketio.emit('log_rate', val);
+            rate = val;
         })
     }
 
     // validate the graph length text box and change the local variable if it succeeds
     function txtLength() {
         // maxPoints = $('#txtLength').val()
-        checkTxt('#txtLength', 'int', (val) => {
+        checkTxt('#txtLength', 'float', (seconds) => {
+            var val = seconds / rate;
+
             // limit the value
             if (val > maxData) {
                 val = maxData;
+                seconds = val * rate;
             }
 
             // overwrite the value entered
             // for example, if they enter "40.5", it gets truncated to "40" by parseInt()
-            $('#txtLength').val(val);
+            $('#txtLength').val(seconds);
 
             for (sensor of sensors) {
                 resizeChart(charts[sensor.pid], val, dataLog[sensor.pid])
@@ -136,8 +142,9 @@
         sensorList.addClass('row-cols-xl-3');
     }
 
+    txtRate(); // this needs to be first
     txtLength(); // read default values from the page
-    txtRate();
+
     clearCharts(charts);
 
 
