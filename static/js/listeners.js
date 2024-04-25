@@ -41,4 +41,6 @@ socketio.on('send_data', (data) => {
 socketio.on('new_log', (data) => {
     $('#aSaveLog').prop('href', data);
     $('#btnSaveLog').prop('disabled', false)
+    //$('#aSaveLog').prop('disabled', false)
+    $('#btnSaveLogDdl').prop('disabled', false)
 })

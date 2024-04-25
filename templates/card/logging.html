@@ -11,28 +11,27 @@
             <label class="me-2" for="txtLength" >Chart window (s):</label>
             <input class="me-2" type="text" id="txtLength" onchange="txtLength()" value="60" style="width: 3rem">
 
-
             <label class="me-2" for="chkGraphs">Graphs:</label>
             <input class="me-auto" type="checkbox" id="chkGraphs" checked="true">
 
-            <a id='aSaveLog'>
-                <input class="btn btn-primary me-2" type="button" id="btnSaveLog" value="Download log" disabled>
-            </a>
+            <div class="btn-group me-2">
+                <a class="btn btn-primary disabled" id="aSaveLog">Download log</a>
+                <button class="btn btn-primary dropdown-toggle dropdown-toggle-split" id="btnSaveLogDdl" data-bs-toggle="dropdown" aria-expanded="false"></button>
+                <div id='ddlSaveLog' class="dropdown-menu"></div>
+            </div>
+
+{#            <a id='aSaveLog'>#}
+{#                <input class="btn btn-primary me-2" type="button" id="btnSaveLog" value="Download log" disabled>#}
+{#            </a>#}
 
             <input class="btn btn-primary" type="button" id="btnBack" value="Back" onclick="btnStop(); navCard('/templates/card/selectsensors.html')"/>
         </div>
     </div>
     <div class="card-body">
         <h4>Live Data</h4>
-
+        {# populate the document with canvases for each sensor chart #}
         {% if sensors|length > 0 %}
-{#        {% if sensors|length == 1 %}#}
         <div class="justify-content-center row sensorList">
-{#        {% elif sensors|length == 2 %}#}
-{#        <div class="justify-content-center row row-cols-sm-1 row-cols-md-2 sensorList">#}
-{#        {% elif sensors|length == 2 %}#}
-{#        <div class="justify-content-center row row-cols-sm-1 row-cols-md-2 row-cols-xl-3 sensorList">#}
-{#        {% endif %}#}
             {% for sensor in sensors %}
             <div class="col">
                 <div class="d-flex pb-2">
@@ -47,8 +46,6 @@
         {% else %}
         <p>No sensors could be loaded. Check the vehicle connection and try again.</p>
         {% endif %}
-
-
     </div>
 </div>
 
@@ -57,48 +54,73 @@
     var dataLog = {};
     var rate;
 
-    // get a JSON list of the sensors to read
+    console.log('sdfh')
+
+    // insert a JSON list of the sensors to read
     var sensors = {{ sensors|tojson }};
 
-    // initialize each chart
-    for (var sensor of sensors) {
-        dataLog[sensor.pid] = [];
-        charts[sensor.pid] =
-            CreateChart(
-                $('#chart_' + sensor.pid),
-                //!! need to adjust range depending on sensor
-                sensor.min, sensor.max
-            )
-        ;
+    // create chart objects for each canvas
+    function initCharts() {
+        // initialize each chart
+        for (var sensor of sensors) {
+            charts[sensor.pid] =
+                CreateChart(
+                    $('#chart_' + sensor.pid),
+                    //!! need to adjust range depending on sensor
+                    sensor.min, sensor.max
+                )
+            ;
+        }
     }
 
+    // populate the client's data log with empty lists for each sensor
+    function initDataLog() {
+        for (var sensor of sensors) {
+            dataLog[sensor.pid] = [];
+        }
+    }
+
+    // tell the server to start sending data
     function btnStart() {
-        socketio.emit('log_start')
-        wasRunning = true;
+        socketio.emit('log_start');
     }
 
+    // tell the server to stop sending data
     function btnStop() {
         socketio.emit('log_stop')
-        wasRunning = false;
+
+        // update the list of log files
+        $('#ddlSaveLog').load('/templates/menu/logfiles.html', function() {
+            // set the main button to the URL of the latest log file
+            $('#aSaveLog').prop('href', $('#ddlSaveLog a').last().prop('href'));
+            // enable the main button
+            $('#aSaveLog').removeClass('disabled');
+        });
     }
 
+    // clear the graphs and client data log
     function btnClear() {
+        // clear data log
+        initDataLog();
+        // disable the "Download log" button until the user has logged more data
+        $('#aSaveLog').addClass('disabled');
+        $('#aSaveLog').prop('href', '');
+        // clear charts
         clearCharts(charts);
     }
 
     // validate the logging rate text box and send an event if it succeeds
     function txtRate() {
-        // socketio.emit('log_rate', $('#txtRate').val())
         checkTxt('#txtRate', 'float', (val) => {
             socketio.emit('log_rate', val);
             rate = val;
         })
     }
 
-    // validate the graph length text box and change the local variable if it succeeds
+    // validate the graph window text box and change the local variable if it succeeds
     function txtLength() {
-        // maxPoints = $('#txtLength').val()
         checkTxt('#txtLength', 'float', (seconds) => {
+            // change seconds into the number of data points to show
             var val = seconds / rate;
 
             // limit the value
@@ -108,15 +130,15 @@
             }
 
             // overwrite the value entered
-            // for example, if they enter "40.5", it gets truncated to "40" by parseInt()
+            // for example, if they enter "3000" seconds it will change to "2000" because the value was limited
             $('#txtLength').val(seconds);
 
+            // resize each chart to the new length
             for (sensor of sensors) {
                 resizeChart(charts[sensor.pid], val, dataLog[sensor.pid])
             }
 
             maxPoints = val;
-            //resizeCharts(charts, val);
         })
     }
 
@@ -142,10 +164,16 @@
         sensorList.addClass('row-cols-xl-3');
     }
 
+    initCharts();
+    initDataLog();
+
     txtRate(); // this needs to be first
     txtLength(); // read default values from the page
 
     clearCharts(charts);
+    $('#ddlSaveLog').load('/templates/menu/logfiles.html');
+
+
 
 
 </script>

@@ -1,0 +1,9 @@
+{#<button class="btn btn-primary" id="btnSaveLog" onclick="">Download log</button>#}
+
+<a class="dropdown-item">Past logs</a>
+<div class="dropdown-divider"></div>
+{% for name in logfiles %}
+<a class="dropdown-item" href="{{ path }}{{ name }}">{{ name }}</a>
+{% endfor %}
+
+

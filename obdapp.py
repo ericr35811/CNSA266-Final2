@@ -8,6 +8,7 @@ from signal import signal, SIGINT
 from werkzeug.serving import BaseWSGIServer, ThreadedWSGIServer
 from time import sleep
 from sys import exit
+from os import listdir
 
 print(__name__)
 
@@ -33,8 +34,8 @@ def index():
 
 
 @app.route('/templates/card/selectsensors.html')
-def card_selectsensors():
-	return render_template('card/selectsensors.html', sensors=obd.sensors)
+def menu_selectsensors():
+	return render_template('menu/selectsensors.html', sensors=obd.sensors)
 
 
 @app.route('/forms/selectsensors', methods=['POST'])
@@ -48,6 +49,11 @@ def form_selectsensors():
 		data_logger.sensors = sensors
 
 		return render_template('card/logging.html', sensors=sensors)
+
+
+@app.route('/templates/menu/logfiles.html')
+def menu_logfiles():
+	return render_template('menu/logfiles.html', logfiles=listdir(data_logger.LOG_DIR), path=data_logger.LOG_DIR)
 
 
 # https://stackoverflow.com/questions/34066804/disabling-caching-in-flask
