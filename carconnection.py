@@ -24,10 +24,10 @@ class CarConnection:
 
 		# task queue
 		self.q = Queue()
-		self.tasks = []
 		# flags to prevent loads of duplicate events on the queue
 		self._f_connect = False
 		self._f_disconnect = False
+		self._f_check_status = False
 
 		# SocketIO connection for sending events
 		self.socketio = socketio
@@ -53,15 +53,18 @@ class CarConnection:
 		else:
 			print('CarConnection: Already connected')
 
-		self._f_connect = False
+		if self._f_connect:
+			self._f_connect = False
 
 	# close the OBD connection
 	def _disconnect(self):
 		if self.obd is not None:
 			self.obd.close()
 
-		self._f_disconnect = False
 		self.q.put(self._check_status)
+
+		if self._f_disconnect:
+			self._f_disconnect = False
 
 	# check whether the connection status has changed, and send an event to the client if it has
 	def _check_status(self, force=False):
@@ -76,6 +79,9 @@ class CarConnection:
 
 		# prepare to run this again
 		self.q.put(self._check_status)
+
+		if self._f_check_status:
+			self._f_check_status = False
 
 	# prepare the list of supported sensors and information about each one
 	def _get_sensors(self):
@@ -117,12 +123,19 @@ class CarConnection:
 			self._f_disconnect = True
 			self.q.put(self._disconnect)
 
+	def check_status(self, force=False):
+		if not self._f_check_status:
+			self._f_check_status = True
+			self.q.put(lambda: self._check_status(force))
+
 	def exit(self):
 		self.disconnect()
 		self.q.put(None)
 
 	# main loop
 	def thread(self):
+		self.q.put(self._check_status)
+
 		while True:
 			# wait for a task on the queue
 			task = self.q.get()

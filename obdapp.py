@@ -8,13 +8,13 @@ from signal import signal, SIGINT
 from werkzeug.serving import BaseWSGIServer, ThreadedWSGIServer
 from time import sleep
 from sys import exit
-from os import listdir
+from os import listdir, urandom
 
 print(__name__)
 
 # create the Flask app
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'RAAAH SECRET'
+app.config['SECRET_KEY'] = urandom(24)
 
 # create the SocketIO app based on the Flask app
 socketio = SocketIO(app, async_mode='threading',logger=app.logger, engineio_logger=app.logger)
@@ -27,6 +27,7 @@ obd = CarConnection(socketio, test=True)
 data_logger = DataLogger(obd, socketio)
 
 # logging.getLogger().addHandler(logging.StreamHandler())
+
 
 @app.route('/')
 def index():
@@ -70,7 +71,8 @@ def add_header(response):
 def onconnect():
 	print('socketio client connected')
 	# if the user reloads the page or connects for the first time, send them the connection status
-	socketio.emit('car_connect_status', obd.status)
+	# socketio.emit('car_connect_status', obd.status)
+	obd.check_status(force=True)
 
 
 @socketio.on('disconnect')

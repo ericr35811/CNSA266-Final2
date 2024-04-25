@@ -11,17 +11,7 @@
 
         <div class="d-inline-block">
             <input class='btn btn-primary me-2' type="button" id="btnLiveData" value="Show live data" onclick="navCard('/templates/card/selectsensors.html')" />
-            <input class='btn btn-primary' type="button" id="btnGetDtc" value="Get trouble codes" onclick=""/>
+            <input class='btn btn-primary' type="button" id="btnGetDtc" value="Get trouble codes" onclick="" disabled/>
         </div>
     </div>
-
-    <script>
-        // disable buttons until WebSocket connection is established
-        //$('input[type="button"]').prop('enabled', false)
-
-        //socketio.on('connect', function() {
-        //    $('input[type="button"]').prop('enabled', true)
-
-        //})
-    </script>
 </div>
