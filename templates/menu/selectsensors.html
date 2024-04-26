@@ -48,22 +48,20 @@
 </div>
 
 <script>
-//    $(document).ready(function() {
-        // submit form and get the next card
-        $('#frmSelectSensors').submit(function(event) {
-            event.preventDefault();
-            $.post({
-                url: '/forms/selectsensors',
-                data: $('#frmSelectSensors').serialize(),
-                success: function(data) {
-                    $('#Content').html(data)
-                }
-            })
+    // submit form and get the next card
+    $('#frmSelectSensors').submit(function(event) {
+        event.preventDefault();
+        $.post({
+            url: '/forms/selectsensors',
+            data: $('#frmSelectSensors').serialize(),
+            success: function(data) {
+                $('#Content').html(data)
+            }
         })
+    })
 
-        // select all
-        $('#chkSelectAll').click(function (event) {
-            $('input[name="chkSensors"]').prop('checked', this.checked)
-        })
-//    })
+    // select all
+    $('#chkSelectAll').click(function (event) {
+        $('input[name="chkSensors"]').prop('checked', this.checked)
+    })
 </script>

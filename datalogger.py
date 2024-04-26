@@ -30,8 +30,6 @@ class DataLogger:
 
 		# task queue
 		self.q = Queue()
-		self._f_start = False
-		self._f_stop = False
 
 		# handle for SocketIO to send events
 		self.socketio = socketio
@@ -130,8 +128,6 @@ class DataLogger:
 		else:
 			print('DataLogger._start: already running')
 
-		self._f_start = False
-
 	def _stop(self):
 		if self.running:
 			self._close_log()
@@ -139,17 +135,11 @@ class DataLogger:
 		else:
 			print('DataLogger._stop: already stopped')
 
-		self._f_stop = False
-
 	def start(self):
-		if not self._f_start:
-			self._f_start = True
-			self.q.put(self._start)
+		self.q.put(self._start)
 
 	def stop(self):
-		if not self._f_stop:
-			self._f_stop = True
-			self.q.put(self._stop)
+		self.q.put(self._stop)
 
 	def exit(self):
 		self.stop()
