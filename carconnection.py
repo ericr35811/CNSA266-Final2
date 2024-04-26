@@ -25,8 +25,6 @@ class CarConnection:
 		# task queue
 		self.q = Queue()
 		# flags to prevent loads of duplicate events on the queue
-		self._f_connect = False
-		self._f_disconnect = False
 		self._f_check_status = False
 
 		# SocketIO connection for sending events
@@ -53,18 +51,12 @@ class CarConnection:
 		else:
 			print('CarConnection: Already connected')
 
-		if self._f_connect:
-			self._f_connect = False
-
 	# close the OBD connection
 	def _disconnect(self):
 		if self.obd is not None:
 			self.obd.close()
 
 		self.q.put(self._check_status)
-
-		if self._f_disconnect:
-			self._f_disconnect = False
 
 	# check whether the connection status has changed, and send an event to the client if it has
 	def _check_status(self, force=False):
@@ -114,14 +106,10 @@ class CarConnection:
 
 	# ----- task creators ------
 	def connect(self):
-		if not self._f_connect:
-			self._f_connect = True
-			self.q.put(self._connect)
+		self.q.put(self._connect)
 
 	def disconnect(self):
-		if not self._f_disconnect:
-			self._f_disconnect = True
-			self.q.put(self._disconnect)
+		self.q.put(self._disconnect)
 
 	def check_status(self, force=False):
 		if not self._f_check_status:
@@ -135,13 +123,25 @@ class CarConnection:
 	# main loop
 	def thread(self):
 		self.q.put(self._check_status)
+		task = self._check_status
 
 		while True:
 			# wait for a task on the queue
-			task = self.q.get()
+			next_task = self.q.get()
+
+			print('* ' + task.__name__)
+			print('- ' + next_task.__name__)
+			for t in self.q.queue:
+				print(t.__name__)
+
+			if next_task is self._check_status and task is self._check_status:
+				continue
+
 			if task is None:
 				break
 			else:
 				task()
+
+			task = next_task
 
 
