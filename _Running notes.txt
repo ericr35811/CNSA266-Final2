@@ -1,2 +1,3 @@
 1. Set up hotspot in GUI
 2. Run sudo nmcli dev up wlan0 to bring up the hotspot
+!! sudo nmcli conn mod Hotspot-1 connection.autoconnect yes
