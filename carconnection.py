@@ -13,7 +13,7 @@ class CarConnection:
 		self.PORT = None
 
 		# options
-		self.rate = 0.5
+		self.rate = 1
 
 		# connection status
 		# only for _check_status()
@@ -127,21 +127,22 @@ class CarConnection:
 
 		while True:
 			# wait for a task on the queue
-			next_task = self.q.get()
+#			next_task = self.q.get()
+			task = self.q.get()
 
-			print('* ' + task.__name__)
-			print('- ' + next_task.__name__)
-			for t in self.q.queue:
-				print(t.__name__)
+			#if task: print('* ' + task.__name__)
+			#print('- ' + next_task.__name__)
+			#for t in self.q.queue:
+			#	print(t.__name__)
 
-			if next_task is self._check_status and task is self._check_status:
-				continue
+#			if next_task.__name__ == '_check_status' and task.__name__ == '_check_status':
+#				continue
 
 			if task is None:
 				break
 			else:
 				task()
 
-			task = next_task
+			#task = next_task
 
 
