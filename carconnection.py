@@ -123,7 +123,6 @@ class CarConnection:
 	# main loop
 	def thread(self):
 		self.q.put(self._check_status)
-		task = self._check_status
 
 		while True:
 			# wait for a task on the queue
