@@ -7,18 +7,25 @@ from atexit import register as atexit_register
 from signal import signal, SIGINT
 from werkzeug.serving import ThreadedWSGIServer
 from time import sleep
-from sys import exit
-from os import listdir, urandom, path
+from sys import exit, argv
+from os import urandom, path
 from glob import glob
 
-TEST = True
+TEST = False
+
+for arg in argv[1:]:
+	if arg == '--test':
+		TEST = True
 
 if gethostname() == 'raspberrypi':
 	if TEST:
+		# use tailscale ip if testing
 		ip = '100.103.188.37'
 	else:
+		# use hotspot ip
 		ip = '10.42.0.1'
 else:
+	# use localhost if not running on the pi
 	ip = '127.0.0.1'
 
 
