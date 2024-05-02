@@ -3,9 +3,9 @@ from obd import commands as obd_commands
 # Lookup table of PIDs which are used for live data, with their min/max values and units
 # from https://www.csselectronics.com/pages/obd2-pid-table-on-board-diagnostics-j1979
 
-MIN = 1
-MAX = 2
-UNIT = 3
+MIN = 0
+MAX = 1
+UNIT = 2
 
 pids = {
 	4:  [0,		100,	'%'			],
@@ -108,7 +108,8 @@ pids = {
 # throw out PIDs that are not supported by the PyOBD library
 temp = {}
 for pid, values in pids.items():
-	if pid in obd_commands[1]:
+	if obd_commands.has_pid(1, pid):
 		temp[pid] = values
 
 pids = temp
+

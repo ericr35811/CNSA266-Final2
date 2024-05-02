@@ -27,6 +27,8 @@ class CarConnection:
 		self.q = Queue()
 		# flags to prevent loads of duplicate events on the queue
 		self._f_check_status = False
+		self._f_connect = False
+		self._f_disconnect = False
 
 		# SocketIO connection for sending events
 		self.socketio = socketio
@@ -43,21 +45,28 @@ class CarConnection:
 			if self.connected():
 				print('CarConnection: Connected to car')
 				self._get_sensors()
-				self._check_status(force=True)
+				#self.check_status(force=True)
+				self.send_status()
 			else:
 				print('CarConnection:', self.obd.status())
 				if self.test:
 					self._get_sensors()
-					self._check_status(force=True)
+					#self.check_status(force=True)
+					self.send_status()
 		else:
 			print('CarConnection: Already connected')
+
+		self._f_connect = False
 
 	# close the OBD connection
 	def _disconnect(self):
 		if self.obd is not None:
 			self.obd.close()
 
-		self.q.put(self._check_status)
+		# self.q.put(self._check_status)
+		self.send_status()
+
+		self._f_disconnect = False
 
 	# check whether the connection status has changed, and send an event to the client if it has
 	def _check_status(self, force=False):
@@ -66,7 +75,8 @@ class CarConnection:
 		if s != self.status or force:
 			self.status = s
 			# wait for browser to acknowledge the event
-			self.socketio.emit('car_connect_status', s)
+			#self.socketio.emit('car_connect_status', s)
+			self.send_status()
 
 		self.socketio.sleep(self.rate)
 
@@ -75,6 +85,9 @@ class CarConnection:
 
 		if self._f_check_status:
 			self._f_check_status = False
+
+	def send_status(self):
+		self.socketio.emit('car_connect_status', self.status)
 
 	# prepare the list of supported sensors and information about each one
 	def _get_sensors(self):
@@ -107,15 +120,19 @@ class CarConnection:
 
 	# ----- task creators ------
 	def connect(self):
-		self.q.put(self._connect)
+		if not self._f_connect:
+			self._f_connect = True
+			self.q.put(self._connect)
 
 	def disconnect(self):
-		self.q.put(self._disconnect)
+		if not self._f_disconnect:
+			self._f_disconnect = True
+			self.q.put(self._disconnect)
 
-	def check_status(self, force=False):
+	def check_status(self):
 		if not self._f_check_status:
 			self._f_check_status = True
-			self.q.put(lambda: self._check_status(force))
+			self.q.put(self._check_status)
 
 	def exit(self):
 		self.disconnect()
@@ -128,10 +145,6 @@ class CarConnection:
 		while True:
 			# wait for a task on the queue
 			task = self.q.get()
-
-			print('*', task.__name__)
-			for t in self.q.queue:
-				print(t.__name__)
 
 			if task is None:
 				break

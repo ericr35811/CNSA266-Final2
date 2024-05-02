@@ -8,9 +8,10 @@ from signal import signal, SIGINT
 from werkzeug.serving import ThreadedWSGIServer
 from time import sleep
 from sys import exit
-from os import listdir, urandom
+from os import listdir, urandom, path
+from glob import glob
 
-TEST = False
+TEST = True
 
 if gethostname() == 'raspberrypi':
 	if TEST:
@@ -70,7 +71,8 @@ def form_selectsensors():
 # gets inserted with jQuery
 @app.route('/templates/menu/logfiles.html')
 def menu_logfiles():
-	logfiles = listdir(data_logger.LOG_DIR)
+	# logfiles = listdir(data_logger.LOG_DIR)
+	logfiles = [path.basename(p) for p in glob(data_logger.LOG_DIR + '*.csv')]
 	logfiles.sort()
 	return render_template('menu/logfiles.html', logfiles=logfiles, path=data_logger.LOG_DIR)
 
@@ -94,7 +96,8 @@ def onconnect():
 	print('socketio client connected')
 	# if the user reloads the page or connects for the first time, send them the connection status
 	# socketio.emit('car_connect_status', obd.status)
-	obd.check_status(force=True)
+	#obd.check_status(force=True)
+	obd.send_status()
 
 
 # fires when a client disconnects from SocketIO
