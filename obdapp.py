@@ -23,7 +23,7 @@ socketio = SocketIO(app, async_mode='threading',logger=app.logger, engineio_logg
 # CarConnection monitors the OBD connection, and DataLogger reads data from the car
 # These are background tasks because they would freeze the web server
 # the threads are controlled via the classes
-obd = CarConnection(socketio, test=True)
+obd = CarConnection(socketio, test=False)
 data_logger = DataLogger(obd, socketio)
 
 # logging.getLogger().addHandler(logging.StreamHandler())
@@ -54,7 +54,9 @@ def form_selectsensors():
 
 @app.route('/templates/menu/logfiles.html')
 def menu_logfiles():
-	return render_template('menu/logfiles.html', logfiles=listdir(data_logger.LOG_DIR), path=data_logger.LOG_DIR)
+	logfiles = listdir(data_logger.LOG_DIR)
+	logfiles.sort()
+	return render_template('menu/logfiles.html', logfiles=logfiles, path=data_logger.LOG_DIR)
 
 
 # https://stackoverflow.com/questions/34066804/disabling-caching-in-flask
@@ -112,11 +114,11 @@ def log_rate(rate):
 if __name__ == '__main__':
 	if gethostname() == 'raspberrypi':
 		ip = '100.103.188.37'
-		#ip = '10.42.0.1'
 	else:
 		ip = '127.0.0.1'
 
 	# ip = '100.68.132.31'
+	ip = '10.42.0.1'
 
 	# app.run(host=ip)
 	app.logger.setLevel('DEBUG')
