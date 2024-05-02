@@ -17,7 +17,6 @@ class CarConnection:
 		self.rate = 1
 
 		# connection status
-		# only for _check_status()
 		self.status = False
 
 		# list of supported sensors
@@ -25,6 +24,7 @@ class CarConnection:
 
 		# task queue
 		self.q = Queue()
+
 		# flags to prevent loads of duplicate events on the queue
 		self._f_check_status = False
 		self._f_connect = False
@@ -45,13 +45,11 @@ class CarConnection:
 			if self.connected():
 				print('CarConnection: Connected to car')
 				self._get_sensors()
-				#self.check_status(force=True)
 				self.send_status()
 			else:
 				print('CarConnection:', self.obd.status())
 				if self.test:
 					self._get_sensors()
-					#self.check_status(force=True)
 					self.send_status()
 		else:
 			print('CarConnection: Already connected')
@@ -63,19 +61,16 @@ class CarConnection:
 		if self.obd is not None:
 			self.obd.close()
 
-		# self.q.put(self._check_status)
 		self.send_status()
 
 		self._f_disconnect = False
 
 	# check whether the connection status has changed, and send an event to the client if it has
-	def _check_status(self, force=False):
+	def _check_status(self):
 		s = self.connected()
 
-		if s != self.status or force:
+		if s != self.status:
 			self.status = s
-			# wait for browser to acknowledge the event
-			#self.socketio.emit('car_connect_status', s)
 			self.send_status()
 
 		self.socketio.sleep(self.rate)

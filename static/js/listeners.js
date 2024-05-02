@@ -23,7 +23,7 @@ socketio.on('car_connect_status', (status) => {
 // push the new data onto each chart
 socketio.on('send_data', (data) => {
     console.log('send_data')
-    for (sensor of data) {
+    for (var sensor of data) {
         if (dataLog.length > maxData) {
             // discard old data if history limit is reached
             // all history is still logged on the server side
@@ -37,10 +37,3 @@ socketio.on('send_data', (data) => {
         $('#val_' + sensor.pid).html(sensor.val);
     }
 });
-
-socketio.on('new_log', (data) => {
-    $('#aSaveLog').prop('href', data);
-    $('#btnSaveLog').prop('disabled', false)
-    //$('#aSaveLog').prop('disabled', false)
-    $('#btnSaveLogDdl').prop('disabled', false)
-})

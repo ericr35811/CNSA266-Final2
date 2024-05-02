@@ -80,7 +80,7 @@ def form_selectsensors():
 def menu_logfiles():
 	# logfiles = listdir(data_logger.LOG_DIR)
 	logfiles = [path.basename(p) for p in glob(data_logger.LOG_DIR + '*.csv')]
-	logfiles.sort()
+	logfiles.sort(reverse=True)
 	return render_template('menu/logfiles.html', logfiles=logfiles, path=data_logger.LOG_DIR)
 
 # disables client-side caching

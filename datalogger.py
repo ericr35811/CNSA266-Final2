@@ -41,7 +41,7 @@ class DataLogger:
 				cpu = cpu_percent(percpu=True)
 				data = []
 				elapsed = round(time() - self.t0, 2)
-				# ---- test
+
 				for i, sensor in enumerate(self.sensors):
 					data.append({
 						'pid': sensor['pid'],
@@ -104,9 +104,9 @@ class DataLogger:
 		self.log_file = open(filename, 'w', newline='')
 		self.csv = csv.writer(self.log_file)
 
-		self.socketio.emit('new_log', filename)
+		# self.socketio.emit('new_log', filename)
 
-		# write the header line (time, pid1, pid2, pid3, etc.
+		# write the header line (time, pid1, pid2, pid3, etc.)
 		self.csv.writerow(['TIME'] + [
 			# sets the sensor name and units as the column name
 			f'{s["name"]} ({obdsensors.pids[s["pid_int"]][obdsensors.UNIT]})' for s in self.sensors

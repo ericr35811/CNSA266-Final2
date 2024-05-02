@@ -17,12 +17,10 @@
             <div class="btn-group me-2">
                 <a class="btn btn-primary disabled" id="aSaveLog">Download log</a>
                 <button class="btn btn-primary dropdown-toggle dropdown-toggle-split" id="btnSaveLogDdl" data-bs-toggle="dropdown" aria-expanded="false"></button>
-                <div id='ddlSaveLog' class="dropdown-menu"></div>
+                <div id='ddlSaveLog' class="dropdown-menu">
+                    {# menu entries will be inserted here #}
+                </div>
             </div>
-
-{#            <a id='aSaveLog'>#}
-{#                <input class="btn btn-primary me-2" type="button" id="btnSaveLog" value="Download log" disabled>#}
-{#            </a>#}
 
             <input class="btn btn-primary" type="button" id="btnBack" value="Back" onclick="btnStop(); navCard('/templates/card/selectsensors.html')"/>
         </div>
@@ -53,8 +51,6 @@
     var charts = {};
     var dataLog = {};
     var rate;
-
-    console.log('sdfh')
 
     // insert a JSON list of the sensors to read
     var sensors = {{ sensors|tojson }};
@@ -92,7 +88,7 @@
         // update the list of log files
         $('#ddlSaveLog').load('/templates/menu/logfiles.html', function() {
             // set the main button to the URL of the latest log file
-            $('#aSaveLog').prop('href', $('#ddlSaveLog a').last().prop('href'));
+            $('#aSaveLog').prop('href', $('#ddlSaveLog a:eq(1)').prop('href'));
             // enable the main button
             $('#aSaveLog').removeClass('disabled');
         });
