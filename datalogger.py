@@ -34,10 +34,8 @@ class DataLogger:
 		# handle for SocketIO to send events
 		self.socketio = socketio
 
-	# def set_sensors(self, sensors):
-	# 	self.sensors = sensors
-
 	def _log(self):
+		# send CPU percents if test mode
 		if self.connection.test:
 			if self.sensors is not None and self.running:
 				cpu = cpu_percent(percpu=True)
@@ -61,22 +59,24 @@ class DataLogger:
 			if self.connection.connected():
 				if self.sensors is not None and self.running:
 					data = []
-					# ---- test
 					for sensor in self.sensors:
 						print('querying', sensor['pid_int'], sensor['name'])
 
 						r = self.connection.obd.query(obd_commands[1][sensor['pid_int']])
-						elapsed = round(r.time - self.t0, 2)
-
-						print('%20s: %s' % (sensor['name'], str(r.value)))
 
 						if r.value is not None:
+							elapsed = round(r.time - self.t0, 2)
+
+							print('%20s: %s' % (sensor['name'], str(r.value)))
+
 							data.append({
 								'pid': sensor['pid'],
 								'val': round(r.value.magnitude, 2),
-								'elapsed': round(time() - self.t0, 2)
+								'elapsed': elapsed
 							})
 						else:
+							# sometimes the value will be None if only one sensor is selected
+							# no idea why, should fix
 							print('!!', sensor['name'], 'was None!')
 							data.append({
 								'pid': sensor['pid'],
@@ -99,6 +99,7 @@ class DataLogger:
 
 	def _new_log(self):
 		# open a new log file
+		# the file handle remains open until logging stops (see _close_log())
 		filename = self.LOG_DIR + datetime.now().strftime(self.LOG_FORMAT)
 		self.log_file = open(filename, 'w', newline='')
 		self.csv = csv.writer(self.log_file)
@@ -145,13 +146,10 @@ class DataLogger:
 		self.stop()
 		self.q.put(None)
 
+	# main loop of the thread
 	def thread(self):
 		while True:
 			task = self.q.get()
-
-			# print('*', task.__name__)
-			# for x in self.q.queue:
-			# 	print(x.__name__)
 
 			if task is None:
 				break

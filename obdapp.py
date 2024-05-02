@@ -1,16 +1,25 @@
-from flask import Flask, render_template, request, session, Response, redirect, jsonify
+from flask import Flask, render_template, request
 from socket import gethostname
-from flask_socketio import SocketIO, emit
+from flask_socketio import SocketIO
 from carconnection import CarConnection
 from datalogger import DataLogger
 from atexit import register as atexit_register
 from signal import signal, SIGINT
-from werkzeug.serving import BaseWSGIServer, ThreadedWSGIServer
+from werkzeug.serving import ThreadedWSGIServer
 from time import sleep
 from sys import exit
 from os import listdir, urandom
 
-print(__name__)
+TEST = False
+
+if gethostname() == 'raspberrypi':
+	if TEST:
+		ip = '100.103.188.37'
+	else:
+		ip = '10.42.0.1'
+else:
+	ip = '127.0.0.1'
+
 
 # create the Flask app
 app = Flask(__name__)
@@ -23,22 +32,25 @@ socketio = SocketIO(app, async_mode='threading',logger=app.logger, engineio_logg
 # CarConnection monitors the OBD connection, and DataLogger reads data from the car
 # These are background tasks because they would freeze the web server
 # the threads are controlled via the classes
-obd = CarConnection(socketio, test=False)
+obd = CarConnection(socketio, test=TEST)
 data_logger = DataLogger(obd, socketio)
 
-# logging.getLogger().addHandler(logging.StreamHandler())
+# FLASK ROUTES -------------------------------------------------------------------------
 
-
+# main page
 @app.route('/')
 def index():
 	return render_template('main.html')
 
 
+# return HTML for the sensor selection card
+# gets inserted into main.html with jQuery
 @app.route('/templates/card/selectsensors.html')
 def menu_selectsensors():
 	return render_template('menu/selectsensors.html', sensors=obd.sensors)
 
 
+# URL for the sensor selection page to POST to
 @app.route('/forms/selectsensors', methods=['POST'])
 def form_selectsensors():
 	if request.method == 'POST':
@@ -49,16 +61,21 @@ def form_selectsensors():
 		# data_logger.set_sensors(sensors)
 		data_logger.sensors = sensors
 
+		# returns HTML for the logging card
+		# gets inserted into main.html with jQuery
 		return render_template('card/logging.html', sensors=sensors)
 
 
+# returns HTML for the log file selection menu
+# gets inserted with jQuery
 @app.route('/templates/menu/logfiles.html')
 def menu_logfiles():
 	logfiles = listdir(data_logger.LOG_DIR)
 	logfiles.sort()
 	return render_template('menu/logfiles.html', logfiles=logfiles, path=data_logger.LOG_DIR)
 
-
+# disables client-side caching
+# not sure if necessary
 # https://stackoverflow.com/questions/34066804/disabling-caching-in-flask
 @app.after_request
 def add_header(response):
@@ -68,7 +85,10 @@ def add_header(response):
 	response.headers['Cache-Control'] = 'public, max-age=0'
 	return response
 
+# SOCKETIO EVENT HANDLERS ---------------------------------------------
 
+
+# fires when a client connects to SocketIO
 @socketio.on('connect')
 def onconnect():
 	print('socketio client connected')
@@ -77,12 +97,14 @@ def onconnect():
 	obd.check_status(force=True)
 
 
+# fires when a client disconnects from SocketIO
 @socketio.on('disconnect')
 def ondisconnect():
 	print('socketio client disconnected')
 	data_logger.stop()
 
 
+# fires when the "Connect to car" button is pressed
 @socketio.on('car_connect')
 def car_connect():
 	print('Connecting to car')
@@ -90,39 +112,33 @@ def car_connect():
 	return True
 
 
+# fires when the "Disconnect" button is pressed
 @socketio.on('car_disconnect')
 def car_disconnect():
 	print('Disconnecting from car')
 	obd.disconnect()
 
 
+# fires when the "Start" button is pressed on the logging card
 @socketio.on('log_start')
 def start_logging():
 	data_logger.start()
 
 
+# fires when the "Stop" button is pressed on the logging card
 @socketio.on('log_stop')
 def stop_logging():
 	data_logger.stop()
 
 
+# fires when the polling rate is changed on the logging card
 @socketio.on('log_rate')
 def log_rate(rate):
 	data_logger.rate = float(rate)
 
 
 if __name__ == '__main__':
-	if gethostname() == 'raspberrypi':
-		ip = '100.103.188.37'
-	else:
-		ip = '127.0.0.1'
-
-	# ip = '100.68.132.31'
-	ip = '10.42.0.1'
-
-	# app.run(host=ip)
 	app.logger.setLevel('DEBUG')
-	# socketio.run(app, host=ip, debug=True, allow_unsafe_werkzeug=True)
 
 	wsgi_server = ThreadedWSGIServer(app=app, host=ip, port=5000)
 
@@ -130,9 +146,11 @@ if __name__ == '__main__':
 	print('starting server thread', end='...')
 	t_server = socketio.start_background_task(wsgi_server.serve_forever)
 	print("done")
+
 	print('starting connmon thread', end='...')
 	t_connmon = socketio.start_background_task(obd.thread)
 	print("done")
+
 	print('starting logger thread', end='...')
 	t_logger = socketio.start_background_task(data_logger.thread)
 	print("done")
@@ -159,10 +177,6 @@ if __name__ == '__main__':
 	atexit_register(clean_shutdown)
 	signal(SIGINT, lambda s, f: clean_shutdown())
 
-	# keep this thread alive so it can c
+	# keep the main thread alive
 	while True:
 		sleep(1)
-
-
-
-

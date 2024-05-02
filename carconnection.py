@@ -2,10 +2,11 @@ from obd import OBD, OBDStatus, commands as obd_commands
 from queue import Queue
 import obdsensors
 
+
 class CarConnection:
 	def __init__(self, socketio, test=False):
 		# OBD connection object
-		self.obd: OBD = None
+		self.obd = None
 
 		# misc connection options
 		self.test = test
@@ -44,7 +45,7 @@ class CarConnection:
 				self._get_sensors()
 				self._check_status(force=True)
 			else:
-				print('CarConnection: Not connected:', self.obd.status())
+				print('CarConnection:', self.obd.status())
 				if self.test:
 					self._get_sensors()
 					self._check_status(force=True)
@@ -97,8 +98,8 @@ class CarConnection:
 				'unit': obdsensors.pids[command.pid][obdsensors.UNIT]
 			}
 			for command in supported
-				# only include if the command has a live data PID and belongs to mode 1 (live data)
-				if command.pid in obdsensors.pids.keys() and command.command[:2] == b'01'
+				# only include if the command has a valid PID and belongs to mode 1 (live data)
+				if command.mode == 1 and command.pid in obdsensors.pids.keys() #command.command[:2] == b'01'
 		]
 
 		# supported_commands is unordered, so sort the new list by PID
@@ -120,28 +121,19 @@ class CarConnection:
 		self.disconnect()
 		self.q.put(None)
 
-	# main loop
+	# main loop of the thread
 	def thread(self):
 		self.q.put(self._check_status)
 
 		while True:
 			# wait for a task on the queue
-#			next_task = self.q.get()
 			task = self.q.get()
 
-			#if task: print('* ' + task.__name__)
-			#print('- ' + next_task.__name__)
-			#for t in self.q.queue:
-			#	print(t.__name__)
-
-#			if next_task.__name__ == '_check_status' and task.__name__ == '_check_status':
-#				continue
+			print('*', task.__name__)
+			for t in self.q.queue:
+				print(t.__name__)
 
 			if task is None:
 				break
 			else:
 				task()
-
-			#task = next_task
-
-
