@@ -80,7 +80,7 @@ class DataLogger:
 							print('!!', sensor['name'], 'was None!')
 							data.append({
 								'pid': sensor['pid'],
-								'val': None,
+								'val': None,				# todo: logging randomly stopped when logging from a real car for a few minutes. thread may have crashed when trying to write None to the csv?
 								'elapsed': round(time() - self.t0, 2)
 							})
 
